@@ -1,9 +1,17 @@
 version: 2.1
 
 description: >
-  Sample orb description
-# What will your orb allow users to accomplish?
-# Descriptions should be short, simple, and informative.
+  A Simple, hassle free, drop in replacement for the old Legacy Slack integration.
+  Simply Add the invluded workflow to yoour project, and configure the following environment 
+  variables, and you will receive Slack notifications containing useful test result information
+  including a random giphy image whenever tests enter, or leave a known state. 
+  
+  e.g. a Build is broken for the first time, or a build is fixed.
+  
+  You will need the following environment variables configured:-
+     * CIRCLECI_TOKEN
+     * GIPHY_TOKEN
+     * SLACK_WEBHOOK
 
 # This information will be displayed in the orb registry and is not mandatory.
 display:
