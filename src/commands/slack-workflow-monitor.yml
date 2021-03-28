@@ -34,9 +34,8 @@ steps:
         # CIRCLE_TOKEN: << parameters.circle-token>>
         # GIPHY_TOKEN: << parameters.giphy-token>>
         # SLACK_WEBHOOK: << parameters.slack-webhook>>
-        GIPHY_SUCCESS_KEYWORD: << parameters.giphy-success-keyword>>"
-        GIPHY_FAILURE_KEYWORD: << parameters.giphy-failure-keyword>>"
-        WORKFLOW_NAME: << parameters.workflow-name >>"
-
+        GIPHY_SUCCESS_KEYWORD: << parameters.giphy-success-keyword>>
+        GIPHY_FAILURE_KEYWORD: << parameters.giphy-failure-keyword>>
+        WORKFLOW_NAME: << parameters.workflow-name >>
       name: Runnning Slack Workflow Monitor
       command: <<include(scripts/slack-workflow-monitor.sh)>>
