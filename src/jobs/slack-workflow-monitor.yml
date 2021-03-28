@@ -32,6 +32,7 @@ parameters:
     type: string
 
 steps:
+  - checkout
   - slack-workflow-monitor:
       workflow-name: << parameters.workflow-name >>
       giphy-success-keyword: << parameters.giphy-success-keyword >>
