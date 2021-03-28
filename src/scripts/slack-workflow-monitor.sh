@@ -27,7 +27,7 @@ SlackMonitor() {
 SetupVars() {
     #https://stackoverflow.com/questions/8903239/how-to-calculate-time-elapsed-in-bash-script
     SECONDS=0
-    GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
+    GIT_COMMIT_DESC=$(git log --format=%B -n 1 "$CIRCLE_SHA1")
     GIT_NO_COMMITS=$(git rev-list HEAD --count)
     CIRCLE_WORKFLOW_URL="https://app.circleci.com/pipelines/workflows/${CIRCLE_WORKFLOW_ID}"
     DATA_URL="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?circle-token=${CIRCLE_TOKEN}"
@@ -41,10 +41,10 @@ SetupVars() {
 
 SetupGiphyVars() {
     SUCCESS_URL="http://api.giphy.com/v1/gifs/random?api_key=${GIPHY_TOKEN}&tag=${GIPHY_SUCCESS_KEYWORD}"
-    SUCCESS_GIF=$(curl -s $SUCCESS_URL | jq -r '.data.images.downsized.url')
+    SUCCESS_GIF=$(curl -s "$SUCCESS_URL" | jq -r '.data.images.downsized.url')
 
     FAIL_URL="http://api.giphy.com/v1/gifs/random?api_key=${GIPHY_TOKEN}&tag=${GIPHY_FAILURE_KEYWORD}"
-    FAIL_GIF=$(curl -s $FAIL_URL | jq -r '.data.images.downsized.url')
+    FAIL_GIF=$(curl -s "$FAIL_URL" | jq -r '.data.images.downsized.url')
 }
 
 SetupPreviousBuildVars() {
@@ -52,18 +52,23 @@ SetupPreviousBuildVars() {
 
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
-    local PREVIOUS_BUILD_DATA=$(curl -s GET $PREVIOUS_BUILD_URL \
+    local PREVIOUS_BUILD_DATA
+    PREVIOUS_BUILD_DATA=$(curl -s GET $PREVIOUS_BUILD_URL \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --header "Circle-Token: ${CIRCLE_TOKEN}")
     PREVIOUS_BUILD_STATUS=$(echo "${PREVIOUS_BUILD_DATA}" | jq -r '.items[0].status')
     # yamllint enable
-    local PB_ITEMS=$(echo "$PREVIOUS_BUILD_DATA" | jq '.items')
-    local PB_LENGTH=$(echo "$PB_ITEMS" | jq length)
+    local PB_ITEMS
+    local PB_LENGTH
+
+    PB_ITEMS=$(echo "$PREVIOUS_BUILD_DATA" | jq '.items')
+    PB_LENGTH=$(echo "$PB_ITEMS" | jq length)
     i="0"
     while [ "$i" -lt "$PB_LENGTH" ]
     do
-      local BUILD_STATUS=$(echo "${PREVIOUS_BUILD_DATA}" | jq --arg i "$i" -r ".items[$i].status")
+      local BUILD_STATUS
+      BUILD_STATUS=$(echo "${PREVIOUS_BUILD_DATA}" | jq --arg i "$i" -r ".items[$i].status")
 
       if [ "${BUILD_STATUS}" == "success" ] || [ "${BUILD_STATUS}" == "failed" ]; then
         PREVIOUS_BUILD_STATUS=$BUILD_STATUS
@@ -91,10 +96,14 @@ ValidateWorkflow() {
       echo "Your circle-token parameter may be wrong or you do not have access to this Workflow."
       exit 1
     fi
-    local WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
-    local WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
+    local WF_ITEMS
+    local WF_LENGTH
+    local VCS_SHORT
+
+    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
+    WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
     # GET URL PATH DATA
-    local VCS_SHORT=$(echo $CIRCLE_BUILD_URL | cut -d"/" -f4)
+    VCS_SHORT=$(echo $CIRCLE_BUILD_URL | cut -d"/" -f4)
     case $VCS_SHORT in
       gh)
         VCS=github
@@ -125,13 +134,18 @@ RunWorkflowMonitor() {
     # and wait until they have all finished.
 
     # Assume the WF is currently running
-    local WF_FINISHED=false
+    local WF_FINISHED
+    WF_FINISHED=false
     while [ "$WF_FINISHED" = false ]
     do
-      local WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
+      local WF_DATA
+      local WF_ITEMS
+      local WF_LENGTH
+
+      WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
       echo "Waiting for other jobs to finish..."
-      local WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
-      local WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
+      WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
+      WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
       # for each job in the workflow fetch the status.
       # the WF_FINISHED will be assumed true unless one of the jobs in the Workflow is still running
@@ -145,10 +159,15 @@ RunWorkflowMonitor() {
       do
         echo "looping: $i"
         # fetch the job info
-        local JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
-        local JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
-        local JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
-        local JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
+        local JOB_DATA
+        local JOB_NUMBER
+        local JOB_STATUS
+        local JOB_NAME
+
+        JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
+        JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
+        JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
+        JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
         # Only check the job if it is not this current job
         if [ "$JOB_NUMBER" = "$CIRCLE_BUILD_NUM" ];
         then
@@ -207,9 +226,12 @@ GenerateSlackMsg() {
 
 GenerateJobsReport() {
 
-    local WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
-    local WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
-    local WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
+    local WF_DATA
+    local WF_ITEMS
+    local WF_LENGTH
+    WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
+    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
+    WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
     ##############Globals##############
     SLACK_JOBS_FIELDS=$(echo '[]' | jq .)
