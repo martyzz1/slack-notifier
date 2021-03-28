@@ -53,7 +53,7 @@ SetupPreviousBuildVars() {
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
     local PREVIOUS_BUILD_DATA
-    PREVIOUS_BUILD_DATA=$(curl -s GET $PREVIOUS_BUILD_URL \
+    PREVIOUS_BUILD_DATA=$(curl -s GET "$PREVIOUS_BUILD_URL" \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --header "Circle-Token: ${CIRCLE_TOKEN}")
@@ -103,7 +103,7 @@ ValidateWorkflow() {
     WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
     # GET URL PATH DATA
-    VCS_SHORT=$(echo $CIRCLE_BUILD_URL | cut -d"/" -f4)
+    VCS_SHORT=$(echo "$CIRCLE_BUILD_URL" | cut -d"/" -f4)
     case $VCS_SHORT in
       gh)
         VCS=github
@@ -236,7 +236,6 @@ GenerateJobsReport() {
     ##############Globals##############
     SLACK_JOBS_FIELDS=$(echo '[]' | jq .)
     FINAL_STATUS='success'
-    FAILED_REASON=''
     # SLACK_MSG_USER
     # SLACK_MSG_AUTHOR
 
@@ -246,11 +245,16 @@ GenerateJobsReport() {
       do
         echo "looping: $i"
         # fetch the job info
-        local JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
-        local JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
-        local JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
-        local JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
-        local SLACK_JOBS_FIELDS_EMOJI=':x:'
+        local JOB_DATA
+        local JOB_NUMBER
+        local JOB_STATUS
+        local JOB_NAME
+        local SLACK_JOBS_FIELDS_EMOJI
+        JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
+        JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
+        JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
+        JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
+        SLACK_JOBS_FIELDS_EMOJI=':x:'
         # Only check the job if it is not this current job
         if [ "$JOB_NUMBER" = "$CIRCLE_BUILD_NUM" ];
         then
@@ -268,12 +272,13 @@ GenerateJobsReport() {
                 BUILD_URL="${CIRCLE_WORKFLOW_URL}"
             else
                 # yamllint disable-line rule:line-length
-                local JOB_DATA_RAW=$(curl -s "https://circleci.com/api/v1.1/project/$VCS/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$JOB_NUMBER?circle-token=${CIRCLE_TOKEN}")
+                local JOB_DATA_RAW
+                JOB_DATA_RAW=$(curl -s "https://circleci.com/api/v1.1/project/$VCS/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$JOB_NUMBER?circle-token=${CIRCLE_TOKEN}")
                 # removing steps and circle_yml keys from object
-                JOB_DATA_RAW=$(echo $JOB_DATA_RAW | jq 'del(.circle_yml)' | jq 'del(.steps)')
+                JOB_DATA_RAW=$(echo "$JOB_DATA_RAW" | jq 'del(.circle_yml)' | jq 'del(.steps)')
                 # manually set job name as it is currently null
-                JOB_DATA_RAW=$(echo $JOB_DATA_RAW | jq --arg JOBNAME "$JOB_NAME" '.job_name = $JOBNAME')
-                local BUILD_URL=$(echo "$JOB_DATA_RAW" | jq -r ".build_url")
+                JOB_DATA_RAW=$(echo "$JOB_DATA_RAW" | jq --arg JOBNAME "$JOB_NAME" '.job_name = $JOBNAME')
+                BUILD_URL=$(echo "$JOB_DATA_RAW" | jq -r ".build_url")
                 SLACK_MSG_USER=$(echo "$JOB_DATA_RAW" | jq ".user")
                 SLACK_MSG_AUTHOR=$(echo "$JOB_DATA_RAW" | jq -r ".author_name")
             fi
@@ -331,7 +336,8 @@ GenerateMsgReport() {
     fi
 
     echo "Preparing initial SLACK_MSG_ATTACHMENT"
-    local SLACK_MSG_ATTACHMENT=$(echo "{ \"attachments\": [ { \"blocks\": [], \"color\": \"${SLACK_MSG_COLOUR}\" }] }" | jq .)
+    local SLACK_MSG_ATTACHMENT
+    SLACK_MSG_ATTACHMENT=$(echo "{ \"attachments\": [ { \"blocks\": [], \"color\": \"${SLACK_MSG_COLOUR}\" }] }" | jq .)
 
     if [ -z ${SLACK_MSG_STATE_TITLE+x} ]; then
         echo "No State Change happenned"
@@ -416,7 +422,7 @@ GenerateMsgReport() {
     ]')
 
     echo "Attaching SLACK_JOBS_FIELDS"
-    echo $SLACK_JOBS_FIELDS
+    echo "$SLACK_JOBS_FIELDS"
     SLACK_MSG_ATTACHMENT=$(echo "$SLACK_MSG_ATTACHMENT" | jq --argjson fields "$SLACK_JOBS_FIELDS" '.attachments[0].blocks += [
         {
             "type": "section",
@@ -456,7 +462,7 @@ GenerateMsgReport() {
         }
     ]')
     echo "Attaching $SLACK_ELEMENTS_FIELDS"
-    echo $SLACK_ELEMENTS_FIELDS
+    echo "$SLACK_ELEMENTS_FIELDS"
 
     SLACK_MSG_ATTACHMENT=$(echo "$SLACK_MSG_ATTACHMENT" | jq --argjson elements "$SLACK_ELEMENTS_FIELDS" '.attachments[0].blocks += [
         {
