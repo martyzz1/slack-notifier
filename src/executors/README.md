@@ -8,7 +8,6 @@ Executors can be used to parameterize the same environment across many jobs. Orb
 
 View the included _[hello.yml](./hello.yml)_ example.
 
-
 ```yaml
 description: >
   This is a sample executor using Docker and Node.

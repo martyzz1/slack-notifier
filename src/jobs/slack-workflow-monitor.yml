@@ -1,0 +1,38 @@
+description: >
+  Sample description
+# What will this job do?
+# Descriptions should be short, simple, and clear.
+
+executor: default
+
+parameters:
+  circle-token:
+    type: env_var_name
+    default: "CIRCLECI_TOKEN"
+    description: >
+      Enter your CircleCI Personal Access Token for interacting with the API.
+      You may generate one here: https://circleci.com/account/api
+  giphy-token:
+    type: env_var_name
+    default: "GIPHY_TOKEN"
+    description: >
+      Enter your giphy Personal Access Token for interacting with their API.
+      You may generate one here: https://developers.giphy.com/docs/api/
+  giphy-success-keyword:
+    type: string
+    default: "party"
+  giphy-failure-keyword:
+    type: string
+    default: "broken"
+  slack-webhook:
+    type: env_var_name
+    default: "SLACK_WEBHOOK"
+    description: "Enter your slack webhook url"
+  workflow-name:
+    type: string
+
+steps:
+  - slack-workflow-monitor:
+      workflow-name: << parameters.workflow-name >>
+      giphy-success-keyword: << parameters.giphy-success-keyword >>
+      giphy-failure-keyword: << parameters.giphy-failure-keyword >>

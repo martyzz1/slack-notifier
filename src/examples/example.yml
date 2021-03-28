@@ -1,13 +1,18 @@
 description: >
-  Sample example description.
-# Provide a use-case based example for using this orb.
+  How to use Slack Notifier
 # Everything in the `usage` section will be displayed in the orb registry.
 # Comments are not retained.
 usage:
   version: 2.1
   orbs:
-    <orb-name>: <namespace>/<orb-name>@1.2.3
+    slacknotifier: martyzz1/slack-notifier@1.2.3
   workflows:
     use-my-orb:
       jobs:
-        - <orb-name>/<job-name>
+        - slacknotifier/slack-workflow-monitor
+          workflow-name: use-my-orb
+          giphy-success-keyword: party
+          giphy-failure-keyword: broken
+        - build
+        - lint
+        - test
