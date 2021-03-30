@@ -328,7 +328,7 @@ GenerateMsgReport() {
           echo "Build was broken"
           SLACK_MSG_STATE_TITLE="${CIRCLE_USERNAME} broke the build!"
           SLACK_MSG_STATE_GIF=$FAIL_GIF
-          SLACK_MSG_STATE_GIF_ALT=$GIPHY_SUCCESS_KEYWORD
+          SLACK_MSG_STATE_GIF_ALT=$GIPHY_FAILURE_KEYWORD
       fi
       SLACK_MSG_HEADER=":x: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
       SLACK_MSG_COLOUR='#ed5c5c'
@@ -337,7 +337,7 @@ GenerateMsgReport() {
           echo "Build was fixed"
           SLACK_MSG_STATE_TITLE="${CIRCLE_USERNAME} Fixed the build!"
           SLACK_MSG_STATE_GIF=$SUCCESS_GIF
-          SLACK_MSG_STATE_GIF_ALT=$GIPHY_FAILURE_KEYWORD
+          SLACK_MSG_STATE_GIF_ALT=$GIPHY_SUCCESS_KEYWORD
       fi
       SLACK_MSG_HEADER=":white_check_mark: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
       SLACK_MSG_COLOUR='#36a64f'
