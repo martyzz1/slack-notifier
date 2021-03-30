@@ -471,7 +471,6 @@ GenerateMsgReport() {
         }
     ]')
     echo "Attaching $SLACK_ELEMENTS_FIELDS"
-    echo "$SLACK_ELEMENTS_FIELDS"
 
     SLACK_MSG_ATTACHMENT=$(echo "$SLACK_MSG_ATTACHMENT" | jq --argjson elements "$SLACK_ELEMENTS_FIELDS" '.attachments[0].blocks += [
         {
@@ -480,13 +479,14 @@ GenerateMsgReport() {
         }
     ]')
 
+    echo "Final SLACK_MSG_ATTACHMENT"
     echo "$SLACK_MSG_ATTACHMENT"
 
 }
 
 SendSlackReport() {
 
-    _RES=$(curl -s -X POST -H 'Content-type: application/json' --no-keepalive  --data "$SLACK_MSG_ATTACHMENT" "$SLACK_WEBHOOK")
+    _RES=$(curl -s -X POST -H 'Content-type: application/json' --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "${SLACK_WEBHOOK}")
     echo "RESULT $_RES"
     if [ ! "$_RES" = "ok" ]; then
       exit 1
