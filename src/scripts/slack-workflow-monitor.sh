@@ -228,7 +228,6 @@ GenerateSlackMsg() {
   duration=$SECONDS
   SLACK_MSG_DURATION="$((duration / 60)) mins and $((duration % 60)) secs"
   GenerateJobsReport
-  echo "SLACK_JOBS_FIELDS=$SLACK_JOBS_FIELDS"
   GenerateMsgReport
 
 }
@@ -345,7 +344,6 @@ GenerateMsgReport() {
     fi
 
     echo "Preparing initial SLACK_MSG_ATTACHMENT"
-    local SLACK_MSG_ATTACHMENT
     SLACK_MSG_ATTACHMENT=$(echo "{ \"attachments\": [ { \"blocks\": [], \"color\": \"${SLACK_MSG_COLOUR}\" }] }" | jq .)
 
     if [ -z ${SLACK_MSG_STATE_TITLE+x} ]; then
@@ -479,12 +477,12 @@ GenerateMsgReport() {
         }
     ]')
 
-    echo "Final SLACK_MSG_ATTACHMENT"
-    echo "$SLACK_MSG_ATTACHMENT"
-
 }
 
 SendSlackReport() {
+    echo "Final SLACK_MSG_ATTACHMENT"
+    echo "$SLACK_MSG_ATTACHMENT"
+    echo "$SLACK_WEBHOOK"
 
     _RES=$(curl -s -X POST -H 'Content-type: application/json' --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "${SLACK_WEBHOOK}")
     echo "RESULT $_RES"
