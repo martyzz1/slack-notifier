@@ -2,6 +2,8 @@ SlackMonitor() {
     SetupVars
     ValidateWorkflow
     echo CIRCLE_TOKEN "${CIRCLE_TOKEN}"
+    echo CIRCLE_BRANCH "${CIRCLE_BRANCH}"
+    echo CIRCLE_SHA1 "${CIRCLE_SHA1}"
     echo GIPHY_TOKEN "${GIPHY_TOKEN}"
     echo SLACK_WEBHOOK "${SLACK_WEBHOOK}"
     echo GIPHY_SUCCESS_KEYWORD "${GIPHY_SUCCESS_KEYWORD}"
@@ -16,12 +18,14 @@ SlackMonitor() {
     echo PREVIOUS_BUILD_STATUS "${PREVIOUS_BUILD_STATUS}"
     echo PROJECT_SLUG "${PROJECT_SLUG}"
     echo SUCCESS_GIF "${SUCCESS_GIF}"
-    echo SUCCESS_GIF "${FAIL_GIF}"
+    echo FAIL_GIF "${FAIL_GIF}"
     echo PREVIOUS_BUILD_STATUS "${PREVIOUS_BUILD_STATUS}"
     echo DATA_URL "${DATA_URL}"
     echo WF_DATA "${WF_DATA}"
 
     RunWorkflowMonitor
+    GenerateSlackMsg
+    SendSlackReport
 }
 
 SetupVars() {
@@ -48,7 +52,7 @@ SetupGiphyVars() {
 }
 
 SetupPreviousBuildVars() {
-    local PREVIOUS_BUILD_URL="GET https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
+    local PREVIOUS_BUILD_URL="https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
 
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
@@ -65,6 +69,7 @@ SetupPreviousBuildVars() {
     PB_ITEMS=$(echo "$PREVIOUS_BUILD_DATA" | jq '.items')
     PB_LENGTH=$(echo "$PB_ITEMS" | jq length)
     i="0"
+    echo "PREVIOUS_BUILD_STATUS $PREVIOUS_BUILD_STATUS"
     while [ "$i" -lt "$PB_LENGTH" ]
     do
       local BUILD_STATUS
@@ -88,6 +93,7 @@ SetupPreviousBuildVars() {
 
 ValidateWorkflow() {
     WF_DATA=$(curl -s "$DATA_URL")
+    echo "$WF_DATA"
     WF_MESSAGE=$(echo "$WF_DATA" | jq '.message')
     # Exit if no Workflow.
     if [ "$WF_MESSAGE" = "\"Workflow not found\"" ];
@@ -142,9 +148,12 @@ RunWorkflowMonitor() {
       local WF_ITEMS
       local WF_LENGTH
 
-      WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
-      echo "Waiting for other jobs to finish..."
+      echo "Waiting for other jobs to finish... $WF_DATA"
+      WF_DATA=$(curl -s "$DATA_URL")
+      echo "WF_DATA $WF_DATA"
+      # WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
       WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
+      echo "WF_ITEMS $WF_ITEMS"
       WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
       # for each job in the workflow fetch the status.
@@ -164,7 +173,7 @@ RunWorkflowMonitor() {
         local JOB_STATUS
         local JOB_NAME
 
-        JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
+        JOB_DATA=$(echo "$WF_ITEMS" | jq --arg i "$i" ".[$i]")
         JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
         JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
         JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
@@ -217,7 +226,7 @@ RunWorkflowMonitor() {
 
 GenerateSlackMsg() {
   duration=$SECONDS
-  SLACK_MSG_DURATION="($duration / 60) mins and ($duration % 60) secs"
+  SLACK_MSG_DURATION="$(($duration / 60)) mins and $(($duration % 60)) secs"
   GenerateJobsReport
   echo "SLACK_JOBS_FIELDS=$SLACK_JOBS_FIELDS"
   GenerateMsgReport
@@ -229,7 +238,7 @@ GenerateJobsReport() {
     local WF_DATA
     local WF_ITEMS
     local WF_LENGTH
-    WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
+    WF_DATA=$(curl -s "$DATA_URL")
     WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
@@ -250,7 +259,7 @@ GenerateJobsReport() {
         local JOB_STATUS
         local JOB_NAME
         local SLACK_JOBS_FIELDS_EMOJI
-        JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
+        JOB_DATA=$(echo "$WF_ITEMS" | jq --arg i "$i" ".[$i]")
         JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
         JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
         JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
