@@ -226,7 +226,7 @@ RunWorkflowMonitor() {
 
 GenerateSlackMsg() {
   duration=$SECONDS
-  SLACK_MSG_DURATION="$(($duration / 60)) mins and $(($duration % 60)) secs"
+  SLACK_MSG_DURATION="$((duration / 60)) mins and $((duration % 60)) secs"
   GenerateJobsReport
   echo "SLACK_JOBS_FIELDS=$SLACK_JOBS_FIELDS"
   GenerateMsgReport
