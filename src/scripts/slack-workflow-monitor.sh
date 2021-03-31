@@ -330,7 +330,7 @@ BuildSlackElementsFields() {
     SLACK_MSG_USER_AVATAR=$2
     SAVEIFS=$IFS
     IFS=$'\n'
-    commits=(${GIT_COMMIT_DESC})
+    commits=("$GIT_COMMIT_DESC")
     IFS=$SAVEIFS
 
     SLACK_ELEMENTS_FIELDS=$(echo '[]' | jq .)
