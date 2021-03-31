@@ -320,6 +320,54 @@ GenerateJobsReport() {
 
 }
 
+BuildSlackElementsFields() {
+
+    local SLACK_MSG_AUTHOR
+    local SLACK_MSG_USER_AVATAR
+    local SLACK_ELEMENTS_FIELDS
+
+    SLACK_MSG_AUTHOR=$1
+    SLACK_MSG_USER_AVATAR=$2
+    SAVEIFS=$IFS
+    IFS=$'\n'
+    commits=($GIT_COMMIT_DESC)
+    IFS=$SAVEIFS
+
+    SLACK_ELEMENTS_FIELDS=$(echo '[]' | jq .)
+    if [ -z ${SLACK_MSG_USER_AVATAR+x} ]; then
+        # nothing to do
+    else
+
+        SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg avatar "${SLACK_MSG_USER_AVATAR}" --arg author "${SLACK_MSG_AUTHOR}" '. += [
+            {
+                "type": "image",
+                "image_url": $avatar,
+                "alt_text": $author
+            }
+        ]')
+    fi
+
+    SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg author "Author: ${SLACK_MSG_AUTHOR}" '. += [
+        {
+            "type": "plain_text",
+            "text": $author,
+            "emoji": true
+        },
+    ]')
+
+    for commit in "${commits[@]}"
+    do
+        SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg commit "$commit" '. += [
+            {
+                "type": "plain_text",
+                "text": $commit,
+                "emoji": true
+            }
+        ]')
+    done
+    echo "$SLACK_ELEMENTS_FIELDS"
+}
+
 GenerateMsgReport() {
 
     # Check for build state change
@@ -440,35 +488,8 @@ GenerateMsgReport() {
     SLACK_MSG_USER_AVATAR=$(echo "$SLACK_MSG_USER" | jq -r ".avatar_url")
 
     echo "Building SLACK_ELEMENTS_FIELDS"
-    SLACK_ELEMENTS_FIELDS=$(echo '[]' | jq .)
-    if [ -z ${SLACK_MSG_USER_AVATAR+x} ]; then
-        echo "No Avatar detected skipping..."
-    else
-
-        echo "SLACK_ELEMENTS_FIELDS ....1"
-        SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg avatar "${SLACK_MSG_USER_AVATAR}" --arg author "${SLACK_MSG_AUTHOR}" '. += [
-            {
-                "type": "image",
-                "image_url": $avatar,
-                "alt_text": $author
-            }
-        ]')
-    fi
-
-    echo "SLACK_ELEMENTS_FIELDS ....2"
-    SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg commit "${GIT_COMMIT_DESC}" --arg author "Author: ${SLACK_MSG_AUTHOR}" '. += [
-        {
-            "type": "plain_text",
-            "text": $author,
-            "emoji": true
-        },
-        {
-            "type": "plain_text",
-            "text": $commit,
-            "emoji": true
-        }
-    ]')
-    echo "Attaching $SLACK_ELEMENTS_FIELDS"
+    SLACK_ELEMENTS_FIELDS=$(BuildSlackElementsFields $SLACK_MSG_AUTHOR $SLACK_MSG_USER_AVATAR)
+    echo "Attaching SLACK_ELEMENTS_FIELDS $SLACK_ELEMENTS_FIELDS"
 
     SLACK_MSG_ATTACHMENT=$(echo "$SLACK_MSG_ATTACHMENT" | jq --argjson elements "$SLACK_ELEMENTS_FIELDS" '.attachments[0].blocks += [
         {
