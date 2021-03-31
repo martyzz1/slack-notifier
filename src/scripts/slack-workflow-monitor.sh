@@ -336,6 +336,7 @@ BuildSlackElementsFields() {
     SLACK_ELEMENTS_FIELDS=$(echo '[]' | jq .)
     if [ -z ${SLACK_MSG_USER_AVATAR+x} ]; then
         # nothing to do
+        true
     else
 
         SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg avatar "${SLACK_MSG_USER_AVATAR}" --arg author "${SLACK_MSG_AUTHOR}" '. += [
