@@ -330,7 +330,7 @@ BuildSlackElementsFields() {
     SLACK_MSG_USER_AVATAR=$2
     SAVEIFS=$IFS
     IFS=$'\n'
-    commits=($GIT_COMMIT_DESC)
+    commits=(${GIT_COMMIT_DESC})
     IFS=$SAVEIFS
 
     SLACK_ELEMENTS_FIELDS=$(echo '[]' | jq .)
@@ -489,7 +489,7 @@ GenerateMsgReport() {
     SLACK_MSG_USER_AVATAR=$(echo "$SLACK_MSG_USER" | jq -r ".avatar_url")
 
     echo "Building SLACK_ELEMENTS_FIELDS"
-    SLACK_ELEMENTS_FIELDS=$(BuildSlackElementsFields $SLACK_MSG_AUTHOR $SLACK_MSG_USER_AVATAR)
+    SLACK_ELEMENTS_FIELDS=$(BuildSlackElementsFields "$SLACK_MSG_AUTHOR" "$SLACK_MSG_USER_AVATAR")
     echo "Attaching SLACK_ELEMENTS_FIELDS $SLACK_ELEMENTS_FIELDS"
 
     SLACK_MSG_ATTACHMENT=$(echo "$SLACK_MSG_ATTACHMENT" | jq --argjson elements "$SLACK_ELEMENTS_FIELDS" '.attachments[0].blocks += [
