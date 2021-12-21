@@ -1,6 +1,6 @@
 # Orb Project Template
 
-[![CircleCI Build Status](https://circleci.com/gh/martyzz1/circleci-slack-notifier.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/martyzz1/slack-notifier) [![CircleCI Orb Version](https://badges.circleci.com/orbs/martyzz1/slack-notifier)](https://circleci.com/orbs/registry/orb/martyzz1/slack-notifier) [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/martyzz1/circleci-slack-notifier/master/LICENSE) [![CircleCI Community](https://img.shields.io/badge/community-CircleCI%20Discuss-343434.svg)](https://discuss.circleci.com/c/ecosystem/orbs)
+[![CircleCI Build Status](https://circleci.com/gh/martyzz1/circleci-slack-notifier.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/martyzz1/slack-notifier) [![CircleCI Orb Version](https://badges.circleci.com/orbs/martyzz1/slack-notifier.svg)](https://circleci.com/orbs/registry/orb/martyzz1/slack-notifier) [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/martyzz1/circleci-slack-notifier/master/LICENSE) [![CircleCI Community](https://img.shields.io/badge/community-CircleCI%20Discuss-343434.svg)](https://discuss.circleci.com/c/ecosystem/orbs)
 
 
 
