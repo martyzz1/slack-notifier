@@ -2,13 +2,9 @@
 
 [![CircleCI Build Status](https://circleci.com/gh/martyzz1/circleci-slack-notifier.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/martyzz1/circleci-slack-notifier) [![CircleCI Orb Version](https://badges.circleci.com/orbs/martyzz1/circleci-slack-notifier)](https://circleci.com/orbs/registry/orb/martyzz1/circleci-slack-notifier) [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/martyzz1/circleci-slack-notifier/master/LICENSE) [![CircleCI Community](https://img.shields.io/badge/community-CircleCI%20Discuss-343434.svg)](https://discuss.circleci.com/c/ecosystem/orbs)
 
-
-
 A starter template for orb projects. Build, test, and publish orbs automatically on CircleCI with [Orb-Tools](https://circleci.com/orbs/registry/orb/circleci/orb-tools).
 
 Additional READMEs are available in each directory.
-
-
 
 ## Resources
 
@@ -36,6 +32,4 @@ Example: `[semver:major]`
 * Squash and merge. Ensure the semver tag is preserved and entered as a part of the commit message.
 * On merge, after manual approval, the orb will automatically be published to the Orb Registry.
 
-
 For further questions/comments about this or other orbs, visit the Orb Category of [CircleCI Discuss](https://discuss.circleci.com/c/orbs).
-
