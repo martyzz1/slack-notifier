@@ -4,6 +4,8 @@ SlackMonitor() {
     SetupVars
     ValidateWorkflow
     echo CIRCLE_TOKEN "${CIRCLE_TOKEN}"
+    echo CIRCLE_BRANCH "${CIRCLE_BRANCH}"
+    echo CIRCLE_SHA1 "${CIRCLE_SHA1}"
     echo GIPHY_TOKEN "${GIPHY_TOKEN}"
     echo SLACK_WEBHOOK "${SLACK_WEBHOOK}"
     echo GIPHY_SUCCESS_KEYWORD "${GIPHY_SUCCESS_KEYWORD}"
@@ -18,7 +20,7 @@ SlackMonitor() {
     echo PREVIOUS_BUILD_STATUS "${PREVIOUS_BUILD_STATUS}"
     echo PROJECT_SLUG "${PROJECT_SLUG}"
     echo SUCCESS_GIF "${SUCCESS_GIF}"
-    echo SUCCESS_GIF "${FAIL_GIF}"
+    echo FAIL_GIF "${FAIL_GIF}"
     echo PREVIOUS_BUILD_STATUS "${PREVIOUS_BUILD_STATUS}"
     echo DATA_URL "${DATA_URL}"
     echo WF_DATA "${WF_DATA}"
@@ -26,7 +28,6 @@ SlackMonitor() {
     RunWorkflowMonitor
     GenerateSlackMsg
     SendSlackReport
-
 }
 
 SetupVars() {
@@ -62,7 +63,7 @@ SetupPreviousBuildVars() {
     echo "PREVIOUS_BUILD_DATA $PREVIOUS_BUILD_DATA"
 
     local PREVIOUS_BUILD_DATA
-    PREVIOUS_BUILD_DATA=$(curl -sLL GET "$PREVIOUS_BUILD_URL" \
+    PREVIOUS_BUILD_DATA=$(curl -sL GET "$PREVIOUS_BUILD_URL" \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --header "Circle-Token: ${CIRCLE_TOKEN}")
@@ -72,11 +73,12 @@ SetupPreviousBuildVars() {
     PREVIOUS_BUILD_STATUS=$(echo "${PREVIOUS_BUILD_DATA}" | jq -r '.items[0].status')
     # yamllint enable
     local PB_ITEMS
-    PB_ITEMS=$(echo "$PREVIOUS_BUILD_DATA" | jq '.items')
     local PB_LENGTH
+
+    PB_ITEMS=$(echo "$PREVIOUS_BUILD_DATA" | jq '.items')
     PB_LENGTH=$(echo "$PB_ITEMS" | jq length)
     i="0"
-    echo "'$i' '$PB_LENGTH'"
+    echo "PREVIOUS_BUILD_STATUS $PREVIOUS_BUILD_STATUS"
     while [ "$i" -lt "$PB_LENGTH" ]
     do
       local BUILD_STATUS
@@ -109,11 +111,11 @@ ValidateWorkflow() {
       exit 1
     fi
     local WF_ITEMS
-    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     local WF_LENGTH
+    local VCS_SHORT
+    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
     # GET URL PATH DATA
-    local VCS_SHORT
     VCS_SHORT=$(echo "$CIRCLE_BUILD_URL" | cut -d"/" -f4)
     case $VCS_SHORT in
       gh)
@@ -145,13 +147,15 @@ RunWorkflowMonitor() {
     # and wait until they have all finished.
 
     # Assume the WF is currently running
-    local WF_FINISHED=false
+    local WF_FINISHED
+    WF_FINISHED=false
     while [ "$WF_FINISHED" = false ]
     do
       local WF_ITEMS
-      WF_ITEMS=$(curl -sL "$DATA_URL" | jq '.items')
-      echo "Waiting for other jobs to finish..."
       local WF_LENGTH
+
+      echo "Waiting for other jobs to finish..."
+      WF_ITEMS=$(curl -sL "$DATA_URL" | jq '.items')
       WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
       # for each job in the workflow fetch the status.
@@ -167,12 +171,13 @@ RunWorkflowMonitor() {
         echo "looping: $i"
         # fetch the job info
         local JOB_DATA
-        JOB_DATA=$(echo "$WF_ITEMS" | jq --arg i "$i" ".[$i]")
         local JOB_NUMBER
-        JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
         local JOB_STATUS
-        JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
         local JOB_NAME
+
+        JOB_DATA=$(echo "$WF_ITEMS" | jq --arg i "$i" ".[$i]")
+        JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
+        JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
         JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
         # Only check the job if it is not this current job
         if [ "$JOB_NUMBER" = "$CIRCLE_BUILD_NUM" ];
@@ -225,7 +230,6 @@ GenerateSlackMsg() {
   duration=$SECONDS
   SLACK_MSG_DURATION="$((duration / 60)) mins and $((duration % 60)) secs"
   GenerateJobsReport
-  echo "SLACK_JOBS_FIELDS=$SLACK_JOBS_FIELDS"
   GenerateMsgReport
 
 }
@@ -233,16 +237,15 @@ GenerateSlackMsg() {
 GenerateJobsReport() {
 
     local WF_DATA
-    WF_DATA=$(curl -sL "$DATA_URL" | jq '.items')
     local WF_ITEMS
-    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     local WF_LENGTH
+    WF_DATA=$(curl -sL "$DATA_URL")
+    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
     ##############Globals##############
     SLACK_JOBS_FIELDS=$(echo '[]' | jq .)
     FINAL_STATUS='success'
-    # FAILED_REASON=''
     # SLACK_MSG_USER
     # SLACK_MSG_AUTHOR
 
@@ -252,15 +255,17 @@ GenerateJobsReport() {
       do
         echo "looping: $i"
         # fetch the job info
+        local BUILD_URL
         local JOB_DATA
-        JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
         local JOB_NUMBER
-        JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
         local JOB_STATUS
-        JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
         local JOB_NAME
+        local SLACK_JOBS_FIELDS_EMOJI
+        JOB_DATA=$(echo "$WF_ITEMS" | jq --arg i "$i" ".[$i]")
+        JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
+        JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
         JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
-        local SLACK_JOBS_FIELDS_EMOJI=':x:'
+        SLACK_JOBS_FIELDS_EMOJI=':x:'
         # Only check the job if it is not this current job
         if [ "$JOB_NUMBER" = "$CIRCLE_BUILD_NUM" ];
         then
@@ -284,7 +289,6 @@ GenerateJobsReport() {
                 JOB_DATA_RAW=$(echo "$JOB_DATA_RAW" | jq 'del(.circle_yml)' | jq 'del(.steps)')
                 # manually set job name as it is currently null
                 JOB_DATA_RAW=$(echo "$JOB_DATA_RAW" | jq --arg JOBNAME "$JOB_NAME" '.job_name = $JOBNAME')
-                local BUILD_URL
                 BUILD_URL=$(echo "$JOB_DATA_RAW" | jq -r ".build_url")
                 SLACK_MSG_USER=$(echo "$JOB_DATA_RAW" | jq ".user")
                 SLACK_MSG_AUTHOR=$(echo "$JOB_DATA_RAW" | jq -r ".author_name")
@@ -319,6 +323,60 @@ GenerateJobsReport() {
 
 }
 
+BuildSlackElementsFields() {
+
+    #local SLACK_MSG_AUTHOR
+    #local SLACK_MSG_USER_AVATAR
+    #local SLACK_ELEMENTS_FIELDS
+
+    #SLACK_MSG_AUTHOR=$1
+    #SLACK_MSG_USER_AVATAR=$2
+    SAVEIFS=$IFS
+    IFS=$'\r\n'
+    commits=("$GIT_COMMIT_DESC")
+    IFS=$SAVEIFS
+
+    printf 'AAAA - %s\n' "${commits[@]}"
+
+    SLACK_ELEMENTS_FIELDS=$(echo '[]' | jq .)
+    if [ -z ${SLACK_MSG_USER_AVATAR+x} ]; then
+        # nothing to do
+        true
+    else
+
+        SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg avatar "${SLACK_MSG_USER_AVATAR}" --arg author "${SLACK_MSG_AUTHOR}" '. += [
+            {
+                "type": "image",
+                "image_url": $avatar,
+                "alt_text": $author
+            }
+        ]')
+    fi
+    echo "AARRGH 1 $SLACK_ELEMENTS_FIELDS"
+
+    SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg author "Author: ${SLACK_MSG_AUTHOR}" '. += [
+        {
+            "type": "plain_text",
+            "text": $author,
+            "emoji": true
+        }
+    ]')
+
+    echo "AARRGH 2 $SLACK_ELEMENTS_FIELDS"
+
+    for commit in "${commits[@]}"
+    do
+        SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg commit "$commit" '. += [
+            {
+                "type": "plain_text",
+                "text": $commit,
+                "emoji": true
+            }
+        ]')
+    done
+    echo "$SLACK_ELEMENTS_FIELDS"
+}
+
 GenerateMsgReport() {
 
     # Check for build state change
@@ -327,7 +385,7 @@ GenerateMsgReport() {
           echo "Build was broken"
           SLACK_MSG_STATE_TITLE="${CIRCLE_USERNAME} broke the build!"
           SLACK_MSG_STATE_GIF=$FAIL_GIF
-          SLACK_MSG_STATE_GIF_ALT=$GIPHY_SUCCESS_KEYWORD
+          SLACK_MSG_STATE_GIF_ALT=$GIPHY_FAILURE_KEYWORD
       fi
       SLACK_MSG_HEADER=":x: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
       SLACK_MSG_COLOUR='#ed5c5c'
@@ -336,14 +394,13 @@ GenerateMsgReport() {
           echo "Build was fixed"
           SLACK_MSG_STATE_TITLE="${CIRCLE_USERNAME} Fixed the build!"
           SLACK_MSG_STATE_GIF=$SUCCESS_GIF
-          SLACK_MSG_STATE_GIF_ALT=$GIPHY_FAILURE_KEYWORD
+          SLACK_MSG_STATE_GIF_ALT=$GIPHY_SUCCESS_KEYWORD
       fi
       SLACK_MSG_HEADER=":white_check_mark: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
       SLACK_MSG_COLOUR='#36a64f'
     fi
 
     echo "Preparing initial SLACK_MSG_ATTACHMENT"
-    local SLACK_MSG_ATTACHMENT
     SLACK_MSG_ATTACHMENT=$(echo "{ \"attachments\": [ { \"blocks\": [], \"color\": \"${SLACK_MSG_COLOUR}\" }] }" | jq .)
 
     if [ -z ${SLACK_MSG_STATE_TITLE+x} ]; then
@@ -440,36 +497,9 @@ GenerateMsgReport() {
     SLACK_MSG_USER_AVATAR=$(echo "$SLACK_MSG_USER" | jq -r ".avatar_url")
 
     echo "Building SLACK_ELEMENTS_FIELDS"
-    SLACK_ELEMENTS_FIELDS=$(echo '[]' | jq .)
-    if [ -z ${SLACK_MSG_USER_AVATAR+x} ]; then
-        echo "No Avatar detected skipping..."
-    else
-
-        echo "SLACK_ELEMENTS_FIELDS ....1"
-        SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg avatar "${SLACK_MSG_USER_AVATAR}" --arg author "${SLACK_MSG_AUTHOR}" '. += [
-            {
-                "type": "image",
-                "image_url": $avatar,
-                "alt_text": $author
-            }
-        ]')
-    fi
-
-    echo "SLACK_ELEMENTS_FIELDS ....2"
-    SLACK_ELEMENTS_FIELDS=$(echo "$SLACK_ELEMENTS_FIELDS" | jq --arg commit "${GIT_COMMIT_DESC}" --arg author "Author: ${SLACK_MSG_AUTHOR}" '. += [
-        {
-            "type": "plain_text",
-            "text": $author,
-            "emoji": true
-        },
-        {
-            "type": "plain_text",
-            "text": $commit,
-            "emoji": true
-        }
-    ]')
-    echo "Attaching $SLACK_ELEMENTS_FIELDS"
-    echo "$SLACK_ELEMENTS_FIELDS"
+    #SLACK_ELEMENTS_FIELDS=$(BuildSlackElementsFields "$SLACK_MSG_AUTHOR" "$SLACK_MSG_USER_AVATAR")
+    BuildSlackElementsFields
+    echo "Attaching SLACK_ELEMENTS_FIELDS $SLACK_ELEMENTS_FIELDS"
 
     SLACK_MSG_ATTACHMENT=$(echo "$SLACK_MSG_ATTACHMENT" | jq --argjson elements "$SLACK_ELEMENTS_FIELDS" '.attachments[0].blocks += [
         {
@@ -483,8 +513,11 @@ GenerateMsgReport() {
 }
 
 SendSlackReport() {
+    echo "Final SLACK_MSG_ATTACHMENT"
+    echo "$SLACK_MSG_ATTACHMENT"
+    echo "$SLACK_WEBHOOK"
 
-    _RES=$(curl -sL -X POST -H 'Content-type: application/json' --no-keepalive  --data "$SLACK_MSG_ATTACHMENT" "${SLACK_WEBHOOK}")
+    _RES=$(curl -sL -X POST -H 'Content-type: application/json' --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "${SLACK_WEBHOOK}")
     echo "RESULT $_RES"
     if [ ! "$_RES" = "ok" ]; then
       exit 1
