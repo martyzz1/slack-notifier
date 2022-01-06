@@ -54,7 +54,6 @@
             echo "CIRCLE_PULL_REQUEST=$CIRCLE_PULL_REQUEST"
             echo "CIRCLE_PROJECT_REPONAME=$CIRCLE_PROJECT_REPONAME"
 
-
             #https://stackoverflow.com/questions/8903239/how-to-calculate-time-elapsed-in-bash-script
             SECONDS=0
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
