@@ -29,6 +29,7 @@ parameters:
     type: string
 
 steps:
+  - checkout
   - run:
       environment:
         # CIRCLE_TOKEN: << parameters.circle-token>>
