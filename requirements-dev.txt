@@ -1,0 +1,1 @@
+https://github.com/robinedwards/gitfeatures/tarball/v0.0.6#egg=gitfeatures
