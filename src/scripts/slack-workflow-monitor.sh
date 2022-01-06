@@ -43,14 +43,14 @@ SetupVars() {
 
 SetupGiphyVars() {
     SUCCESS_URL="http://api.giphy.com/v1/gifs/random?api_key=${GIPHY_TOKEN}&tag=${GIPHY_SUCCESS_KEYWORD}"
-    SUCCESS_GIF=$(curl -s "$SUCCESS_URL" | jq -r '.data.images.downsized.url')
+    SUCCESS_GIF=$(curl -sL "$SUCCESS_URL" | jq -r '.data.images.downsized.url')
 
     FAIL_URL="http://api.giphy.com/v1/gifs/random?api_key=${GIPHY_TOKEN}&tag=${GIPHY_FAILURE_KEYWORD}"
-    FAIL_GIF=$(curl -s "$FAIL_URL" | jq -r '.data.images.downsized.url')
+    FAIL_GIF=$(curl -sL "$FAIL_URL" | jq -r '.data.images.downsized.url')
 }
 
 SetupPreviousBuildVars() {
-    local PREVIOUS_BUILD_URL="GET https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
+    local PREVIOUS_BUILD_URL="https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
 
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
@@ -59,7 +59,7 @@ SetupPreviousBuildVars() {
     echo "PREVIOUS_BUILD_DATA $PREVIOUS_BUILD_DATA"
 
     local PREVIOUS_BUILD_DATA
-    PREVIOUS_BUILD_DATA=$(curl -s GET "$PREVIOUS_BUILD_URL" \
+    PREVIOUS_BUILD_DATA=$(curl -sLL GET "$PREVIOUS_BUILD_URL" \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --header "Circle-Token: ${CIRCLE_TOKEN}")
@@ -73,6 +73,7 @@ SetupPreviousBuildVars() {
     local PB_LENGTH
     PB_LENGTH=$(echo "$PB_ITEMS" | jq length)
     i="0"
+    echo "'$i' '$PB_LENGTH'"
     while [ "$i" -lt "$PB_LENGTH" ]
     do
       local BUILD_STATUS
@@ -95,7 +96,7 @@ SetupPreviousBuildVars() {
 }
 
 ValidateWorkflow() {
-    WF_DATA=$(curl -s "$DATA_URL")
+    WF_DATA=$(curl -sL "$DATA_URL")
     WF_MESSAGE=$(echo "$WF_DATA" | jq '.message')
     # Exit if no Workflow.
     if [ "$WF_MESSAGE" = "\"Workflow not found\"" ];
@@ -144,11 +145,9 @@ RunWorkflowMonitor() {
     local WF_FINISHED=false
     while [ "$WF_FINISHED" = false ]
     do
-      local WF_DATA
-      WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
-      echo "Waiting for other jobs to finish..."
       local WF_ITEMS
-      WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
+      WF_ITEMS=$(curl -sL "$DATA_URL" | jq '.items')
+      echo "Waiting for other jobs to finish..."
       local WF_LENGTH
       WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
@@ -165,7 +164,7 @@ RunWorkflowMonitor() {
         echo "looping: $i"
         # fetch the job info
         local JOB_DATA
-        JOB_DATA=$(echo "$WF_DATA" | jq --arg i "$i" ".[$i]")
+        JOB_DATA=$(echo "$WF_ITEMS" | jq --arg i "$i" ".[$i]")
         local JOB_NUMBER
         JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
         local JOB_STATUS
@@ -231,7 +230,7 @@ GenerateSlackMsg() {
 GenerateJobsReport() {
 
     local WF_DATA
-    WF_DATA=$(curl -s "$DATA_URL" | jq '.items')
+    WF_DATA=$(curl -sL "$DATA_URL" | jq '.items')
     local WF_ITEMS
     WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     local WF_LENGTH
@@ -277,7 +276,7 @@ GenerateJobsReport() {
             else
                 # yamllint disable-line rule:line-length
                 local JOB_DATA_RAW
-                JOB_DATA_RAW=$(curl -s "https://circleci.com/api/v1.1/project/$VCS/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$JOB_NUMBER?circle-token=${CIRCLE_TOKEN}")
+                JOB_DATA_RAW=$(curl -sL "https://circleci.com/api/v1.1/project/$VCS/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$JOB_NUMBER?circle-token=${CIRCLE_TOKEN}")
                 # removing steps and circle_yml keys from object
                 JOB_DATA_RAW=$(echo "$JOB_DATA_RAW" | jq 'del(.circle_yml)' | jq 'del(.steps)')
                 # manually set job name as it is currently null
@@ -482,7 +481,7 @@ GenerateMsgReport() {
 
 SendSlackReport() {
 
-    _RES=$(curl -s -X POST -H 'Content-type: application/json' --no-keepalive  --data "$SLACK_MSG_ATTACHMENT" "${SLACK_WEBHOOK}")
+    _RES=$(curl -sL -X POST -H 'Content-type: application/json' --no-keepalive  --data "$SLACK_MSG_ATTACHMENT" "${SLACK_WEBHOOK}")
     echo "RESULT $_RES"
     if [ ! "$_RES" = "ok" ]; then
       exit 1
