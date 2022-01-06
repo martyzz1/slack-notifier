@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 SlackMonitor() {
     SetupVars
     ValidateWorkflow
@@ -49,8 +51,6 @@ SetupGiphyVars() {
 
 SetupPreviousBuildVars() {
     local PREVIOUS_BUILD_URL="GET https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
-
-    local PREVIOUS_BUILD_URL="GET https://circleci.com/api/v2/insights/gh/martyzz1/slack-notifier/workflows/integration-test_deploy?branch=main"
 
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
