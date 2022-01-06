@@ -52,13 +52,22 @@ SetupGiphyVars() {
 SetupPreviousBuildVars() {
     local PREVIOUS_BUILD_URL="GET https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
 
+    local PREVIOUS_BUILD_URL="GET https://circleci.com/api/v2/insights/gh/martyzz1/slack-notifier/workflows/integration-test_deploy?branch=main"
+
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
+
+    echo " PREVIOUS_BUILD_STATUS $PREVIOUS_BUILD_STATUS"
+    echo "PREVIOUS_BUILD_DATA $PREVIOUS_BUILD_DATA"
+
     local PREVIOUS_BUILD_DATA
     PREVIOUS_BUILD_DATA=$(curl -s GET "$PREVIOUS_BUILD_URL" \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --header "Circle-Token: ${CIRCLE_TOKEN}")
+
+    echo "PREVIOUS_BUILD_URL $PREVIOUS_BUILD_URL"
+
     PREVIOUS_BUILD_STATUS=$(echo "${PREVIOUS_BUILD_DATA}" | jq -r '.items[0].status')
     # yamllint enable
     local PB_ITEMS
