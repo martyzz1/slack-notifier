@@ -24,6 +24,9 @@ SlackMonitor() {
     echo WF_DATA "${WF_DATA}"
 
     RunWorkflowMonitor
+    GenerateSlackMsg
+    SendSlackReport
+
 }
 
 SetupVars() {
