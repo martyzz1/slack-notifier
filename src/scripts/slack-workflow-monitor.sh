@@ -1,5 +1,3 @@
-#!/bin/env bash
-
 SlackMonitor() {
     SetupVars
     ValidateWorkflow
