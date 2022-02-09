@@ -265,7 +265,7 @@ GenerateJobsReport() {
         JOB_NUMBER=$(echo "$JOB_DATA" | jq ".job_number")
         JOB_STATUS=$(echo "$JOB_DATA" | jq -r ".status")
         JOB_NAME=$(echo "$JOB_DATA" | jq -r ".name")
-        SLACK_JOBS_FIELDS_EMOJI=':x:'
+        SLACK_JOBS_FIELDS_EMOJI=':grey_question:'
         # Only check the job if it is not this current job
         if [ "$JOB_NUMBER" = "$CIRCLE_BUILD_NUM" ];
         then
