@@ -21,7 +21,6 @@ SlackMonitor() {
     echo PROJECT_SLUG "${PROJECT_SLUG}"
     echo SUCCESS_GIF "${SUCCESS_GIF}"
     echo FAIL_GIF "${FAIL_GIF}"
-    echo PREVIOUS_BUILD_STATUS "${PREVIOUS_BUILD_STATUS}"
     echo DATA_URL "${DATA_URL}"
     echo WF_DATA "${WF_DATA}"
 
@@ -34,6 +33,7 @@ SetupVars() {
     #https://stackoverflow.com/questions/8903239/how-to-calculate-time-elapsed-in-bash-script
     SECONDS=0
     GIT_COMMIT_DESC=$(git log --format=%B -n 1 "$CIRCLE_SHA1")
+	echo "TTTT"
     GIT_NO_COMMITS=$(git rev-list HEAD --count)
     CIRCLE_WORKFLOW_URL="https://app.circleci.com/pipelines/workflows/${CIRCLE_WORKFLOW_ID}"
     DATA_URL="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?circle-token=${CIRCLE_TOKEN}"
@@ -59,16 +59,15 @@ SetupPreviousBuildVars() {
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
 
+    local PREVIOUS_BUILD_DATA
     echo " PREVIOUS_BUILD_STATUS $PREVIOUS_BUILD_STATUS"
     echo "PREVIOUS_BUILD_DATA $PREVIOUS_BUILD_DATA"
+    echo "PREVIOUS_BUILD_URL $PREVIOUS_BUILD_URL"
 
-    local PREVIOUS_BUILD_DATA
     PREVIOUS_BUILD_DATA=$(curl -sL GET "$PREVIOUS_BUILD_URL" \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
     --header "Circle-Token: ${CIRCLE_TOKEN}")
-
-    echo "PREVIOUS_BUILD_URL $PREVIOUS_BUILD_URL"
 
     PREVIOUS_BUILD_STATUS=$(echo "${PREVIOUS_BUILD_DATA}" | jq -r '.items[0].status')
     # yamllint enable
@@ -103,6 +102,9 @@ SetupPreviousBuildVars() {
 ValidateWorkflow() {
     WF_DATA=$(curl -sL "$DATA_URL")
     WF_MESSAGE=$(echo "$WF_DATA" | jq '.message')
+	echo "DATA_URL=$DATA_URL"
+	echo "WF_DATA=$WF_DATA"
+	echo "WF_MESSAGE=$WF_MESSAGE"
     # Exit if no Workflow.
     if [ "$WF_MESSAGE" = "\"Workflow not found\"" ];
     then
