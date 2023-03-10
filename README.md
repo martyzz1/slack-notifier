@@ -1,19 +1,26 @@
 # Orb Project Template
 
-[![CircleCI Build Status](https://circleci.com/gh/martyzz1/slack-notifier.svg?style=shield&circle-token=f662169bb2d7778d8cc6425e91d46a452cca8de1 "CircleCI Build Status")](https://circleci.com/gh/martyzz1/slack-notifier) [![CircleCI Orb Version](https://badges.circleci.com/orbs/martyzz1/slack-notifier.svg?&circle-token=f662169bb2d7778d8cc6425e91d46a452cca8de1)](https://circleci.com/orbs/registry/orb/martyzz1/slack-notifier) [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/martyzz1/slack-notifier/master/LICENSE) [![CircleCI Community](https://img.shields.io/badge/community-CircleCI%20Discuss-343434.svg)](https://discuss.circleci.com/c/ecosystem/orbs)
+[![CircleCI Build Status](https://circleci.com/gh/martyzz1/slack-notifier.svg?style=shield&circle-token=f662169bb2d7778d8cc6425e91d46a452cca8de1 "CircleCI Build Status")](https://circleci.com/gh/martyzz1/slack-notifier)
+[![CircleCI Orb Version](https://badges.circleci.com/orbs/martyzz1/slack-notifier.svg?&circle-token=f662169bb2d7778d8cc6425e91d46a452cca8de1)](https://circleci.com/orbs/registry/orb/martyzz1/slack-notifier)
+[![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/martyzz1/slack-notifier/master/LICENSE)
+[![CircleCI Community](https://img.shields.io/badge/community-CircleCI%20Discuss-343434.svg)](https://discuss.circleci.com/c/ecosystem/orbs)
 
 ## What does it do?
 
-### You Broke the Build!
+### You Broke the Build
+
 ![](assets/build-broken.png)
 
 ### Still Broken
+
 ![](assets/still-broke.png)
 
-### You Fixed the Build!
+### You Fixed the Build
+
 ![](assets/build-fixed.png)
 
 ### All is still good
+
 ![](assets/still-good.png)
 
 ## Resources
@@ -26,6 +33,7 @@
 We welcome [issues](https://github.com/martyzz1/slack-notifier/issues) to and [pull requests](https://github.com/martyzz1/slack-notifier/pulls) against this repository!
 
 ### How to Publish
+
 * Create and push a branch with your new features.
 * When ready to publish a new production version, create a Pull Request from _feature branch_ to `master`.
 * The title of the pull request must contain a special semver tag: `[semver:<segement>]` where `<segment>` is replaced by one of the following values.
@@ -57,11 +65,13 @@ If you see this error, you need to publish a dev:alpha version manually. The fix
 ```bash
 circleci orb pack ./src | circleci orb validate -
 circleci orb pack ./src | circleci orb publish -  martyzz1/slack-notifier@dev:alpha
+
 ```
 
 ## Usage
 
 To use the orb add this:
+
 ```yaml
     version: '2.1'
 orbs:
