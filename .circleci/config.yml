@@ -18,8 +18,8 @@ workflows:
       - orb-tools/review:
           filters: *filters
       - shellcheck/check:
-        dir: ./src/scripts
           filters: *filters
+          dir: ./src/scripts
       - orb-tools/publish:
           orb-name: martyzz1/slack-notifier
           vcs-type: << pipeline.project.type >>
