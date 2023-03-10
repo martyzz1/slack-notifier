@@ -9,7 +9,7 @@ description: >
   e.g. a Build is broken for the first time, or a build is fixed.
 
   You will need the following environment variables configured
-     * CIRCLECI_TOKEN
+     * CIRCLE_TOKEN
      * GIPHY_TOKEN
      * SLACK_WEBHOOK
 

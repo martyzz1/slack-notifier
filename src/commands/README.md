@@ -9,7 +9,7 @@ description: >
 parameters:
   circle-token:
     type: env_var_name
-    default: "CIRCLECI_TOKEN"
+    default: "CIRCLE_TOKEN"
     description: >
       Enter your CircleCI Personal Access Token for interacting with the API.
       You may generate one here: https://circleci.com/account/api
@@ -44,6 +44,7 @@ steps:
 
 ```
 
-## See:
- - [Orb Author Intro](https://circleci.com/docs/2.0/orb-author-intro/#section=configuration)
- - [How to author commands](https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands)
+## See
+
+- [Orb Author Intro](https://circleci.com/docs/2.0/orb-author-intro/#section=configuration)
+- [How to author commands](https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands)
