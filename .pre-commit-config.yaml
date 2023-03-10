@@ -3,44 +3,48 @@
 ---
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.4.0
     hooks:
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: check-symlinks
+      - id: check-json
+      - id: pretty-format-json
+        args: [--autofix, --indent, "2", --no-ensure-ascii, --no-sort-keys]
+        exclude: |
+          (?x)(
+            .jshintrc$|
+          )
       - id: check-vcs-permalinks
-      - id: check-xml
       - id: debug-statements
-      # - id: detect-private-key
+      - id: detect-private-key
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
       - id: mixed-line-ending  # force UNIX file endings for consistency
         args: [--fix=lf]
-      - id: pretty-format-json
-        args: [--autofix, --indent, "2", --no-ensure-ascii, --no-sort-keys]
-        exclude: |
-          (?x)(
-            ^Pipfile\.lock$|
-            /fixtures/.*\.json$
-          )
       - id: check-executables-have-shebangs
-      - id: requirements-txt-fixer
-        args: [requirements-dev.txt]
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.26.0
+    rev: v1.29.0
     hooks:
       - id: yamllint
-  - repo: https://github.com/jumanjihouse/pre-commit-hooks
-    rev: 2.1.5
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.33.0
     hooks:
-      - id: shellcheck
-        exclude: |
-          (?x)(
-            test-notifier\.sh$
-          )
+      - id: markdownlint-fix
+  - repo: https://github.com/martyzz1/pre-commit-hooks
+    rev: v1.8
+    hooks:
+      - id: prepend-branch-name
+      - id: circleci-config-validate
+        # args: ["--org-slug", "github/harper-concierge"]
+      - id: circleci-orb-pack-validation
   - repo: https://github.com/Lucas-C/pre-commit-hooks-markup
     rev: v1.0.1
     hooks:
       - id: rst-linter
         args: [--allow-raw]
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: shellcheck
