@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 
 SlackMonitor() {
+	local VALIDATED=true
+    if [ "$CIRCLE_TOKEN" == "" ];
+    then
+      echo "Your circle-token parameter (CIRCLE_TOKEN env variable) is not set."
+      VALIDATED=false
+    fi
+    if [ "$GIPHY_TOKEN" == "" ];
+    then
+      echo "Your giphy-token parameter (GIPHY_TOKEN env variable) is not set."
+      VALIDATED=false
+    fi
+    if [ "$SLACK_WEBHOOK" == "" ];
+    then
+      echo "Your slack-webhook parameter (SLACK_WEBHOOK env variable) is not set."
+      VALIDATED=false
+    fi
+
+	if [ $VALIDATED == false ];
+	then
+      exit 1
+	fi
+
     SetupVars
     ValidateWorkflow
     echo CIRCLE_TOKEN "${CIRCLE_TOKEN}"
