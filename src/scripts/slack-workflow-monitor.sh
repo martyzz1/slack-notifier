@@ -275,6 +275,8 @@ GenerateJobsReport() {
 
     echo "Generating FINAL JOB INFORMATION"
     i=0
+	success_count=0
+	added_count=0
     while [ "$i" -lt "$WF_LENGTH" ]
       do
         echo "looping: $i"
@@ -324,17 +326,26 @@ GenerateJobsReport() {
                 SLACK_JOBS_FIELDS_EMOJI=':x:'
             elif [ "$JOB_STATUS" == "success" ];
             then
+				((success_count++))
                 SLACK_JOBS_FIELDS_EMOJI=':white_check_mark:'
             else
                 SLACK_JOBS_FIELDS_EMOJI=':no_entry_sign:'
             fi
 
-            SLACK_JOBS_FIELDS=$(echo "$SLACK_JOBS_FIELDS" | jq --arg job "${SLACK_JOBS_FIELDS_EMOJI} *<${BUILD_URL}|$JOB_NAME>*" '. += [
-                {
-                    "type": "mrkdwn",
-                    "text": $job
-                }
-            ]')
+			if [[ "$added_count" -lt 10 ]]; then
+				if [[ "$JOB_STATUS" == "failed" || ( "$JOB_STATUS" == "successful" && $((success_count)) -gt $((WF_LENGTH - 10)) ) ]]; then
+
+					SLACK_JOBS_FIELDS=$(echo "$SLACK_JOBS_FIELDS" | jq --arg job "${SLACK_JOBS_FIELDS_EMOJI} *<${BUILD_URL}|$JOB_NAME>*" '. += [
+						{
+							"type": "mrkdwn",
+							"text": $job
+						}
+					]')
+					((added_count++))
+				fi
+			else
+				break
+			fi
 
             echo "$JOB_DATA_RAW"
         fi
