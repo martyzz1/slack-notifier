@@ -2,7 +2,7 @@ version: 2.1
 
 description: >
   A Simple, hassle free, drop in replacement for the old Legacy Slack integration.
-  Simply Add the invluded workflow to yoour project, and configure the following environment
+  Simply Add the invluded workflow to your project, and configure the following environment
   variables, and you will receive Slack notifications containing useful test result information
   including a random giphy image whenever tests enter, or leave a known state.
 
@@ -12,6 +12,8 @@ description: >
      * CIRCLE_TOKEN
      * GIPHY_TOKEN
      * SLACK_ACCESS_TOKEN
+
+  Configure the SLACK_ACCESS_TOKEN in the same way as described by the official slack plugin
 
 # This information will be displayed in the orb registry and is not mandatory.
 display:
