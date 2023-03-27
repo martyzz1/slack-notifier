@@ -3,8 +3,6 @@ description: >
 # What will this job do?
 # Descriptions should be short, simple, and clear.
 
-executor: default
-
 parameters:
   circle-token:
     type: env_var_name
