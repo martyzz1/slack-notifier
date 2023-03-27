@@ -25,10 +25,9 @@ parameters:
   giphy-failure-keyword:
     type: string
     default: "broken"
-  slack-webhook:
-    type: env_var_name
-    default: "SLACK_WEBHOOK"
-    description: "Enter your slack webhook url"
+  channel:
+    type: string
+    description: "Enter your slack channel"
   workflow-name:
     type: string
 

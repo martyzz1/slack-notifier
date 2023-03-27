@@ -11,7 +11,7 @@ description: >
   You will need the following environment variables configured
      * CIRCLE_TOKEN
      * GIPHY_TOKEN
-     * SLACK_WEBHOOK
+     * SLACK_ACCESS_TOKEN
 
 # This information will be displayed in the orb registry and is not mandatory.
 display:

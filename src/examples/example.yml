@@ -13,6 +13,7 @@ usage:
             workflow-name: use-my-orb
             giphy-success-keyword: party
             giphy-failure-keyword: broken
+            channel: FR45T0LF53
             context: Slack Notifier
         - build
         - lint

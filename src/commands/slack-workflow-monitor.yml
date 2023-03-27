@@ -21,10 +21,10 @@ parameters:
   giphy-failure-keyword:
     type: string
     default: "broken"
-  slack-webhook:
-    type: env_var_name
-    default: "SLACK_WEBHOOK"
-    description: "Enter your slack webhook url"
+  channel:
+    type: string
+    description: "Enter the slack Channel to post to (e.g. C15R5NJ7RM5)"
+
   workflow-name:
     type: string
 
@@ -32,11 +32,9 @@ steps:
   - checkout
   - run:
       environment:
-        # CIRCLE_TOKEN: << parameters.circle-token>>
-        # GIPHY_TOKEN: << parameters.giphy-token>>
-        # SLACK_WEBHOOK: << parameters.slack-webhook>>
         GIPHY_SUCCESS_KEYWORD: << parameters.giphy-success-keyword>>
         GIPHY_FAILURE_KEYWORD: << parameters.giphy-failure-keyword>>
         WORKFLOW_NAME: << parameters.workflow-name >>
+        SLACK_CHANNEL: << parameters.channel >>
       name: Runnning Slack Workflow Monitor
       command: <<include(scripts/slack-workflow-monitor.sh)>>

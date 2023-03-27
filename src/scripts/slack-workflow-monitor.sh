@@ -12,9 +12,9 @@ SlackMonitor() {
       echo "Your giphy-token parameter (GIPHY_TOKEN env variable) is not set."
       VALIDATED=false
     fi
-    if [ "$SLACK_WEBHOOK" == "" ];
+    if [ "$SLACK_CHANNEL" == "" ];
     then
-      echo "Your slack-webhook parameter (SLACK_WEBHOOK env variable) is not set."
+      echo "Your channel parameter is not set."
       VALIDATED=false
     fi
 
@@ -29,7 +29,7 @@ SlackMonitor() {
     echo CIRCLE_BRANCH "${CIRCLE_BRANCH}"
     echo CIRCLE_SHA1 "${CIRCLE_SHA1}"
     echo GIPHY_TOKEN "${GIPHY_TOKEN}"
-    echo SLACK_WEBHOOK "${SLACK_WEBHOOK}"
+    echo SLACK_CHANNEL "${SLACK_CHANNEL}"
     echo GIPHY_SUCCESS_KEYWORD "${GIPHY_SUCCESS_KEYWORD}"
     echo GIPHY_FAILURE_KEYWORD "${GIPHY_FAILURE_KEYWORD}"
     echo WORKFLOW_NAME "${WORKFLOW_NAME}"
@@ -557,9 +557,11 @@ GenerateMsgReport() {
 SendSlackReport() {
     echo "Final SLACK_MSG_ATTACHMENT"
     echo "$SLACK_MSG_ATTACHMENT"
-    echo "$SLACK_WEBHOOK"
+    echo "$SLACK_CHANNEL"
 
-    _RES=$(curl -sL -X POST -H 'Content-type: application/json' --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "${SLACK_WEBHOOK}")
+	SLACK_MSG_ATTACHMENT="$(printf '%s' "$SLACK_MSG_ATTACHMENT" | jq ". + {\"channel\": \"$SLACK_CHANNEL\"}")"
+    #_RES=$(curl -sL -X POST -H 'Content-type: application/json' --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "${SLACK_WEBHOOK}")
+    _RES=$(curl -sL -X POST -H 'Content-type: application/json' -H "Authorization: Bearer $SLACK_ACCESS_TOKEN" --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "https://slack.com/api/chat.postMessage")
     echo "RESULT $_RES"
     if [ ! "$_RES" = "ok" ]; then
       exit 1
