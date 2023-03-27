@@ -301,6 +301,7 @@ GenerateJobsReport() {
             echo "JOB: $JOB_NAME"
             echo "JOB NUM: $JOB_NUMBER"
             echo "STATUS: $JOB_STATUS"
+			uname -a
 
             # If $JOB_NUMBER is null, probably a blocked/queued Job.
             if [ "$JOB_NUMBER" = "null" ];
@@ -326,7 +327,7 @@ GenerateJobsReport() {
                 SLACK_JOBS_FIELDS_EMOJI=':x:'
             elif [ "$JOB_STATUS" == "success" ];
             then
-				((success_count++))
+				success_count=$((success_count + 1))
                 SLACK_JOBS_FIELDS_EMOJI=':white_check_mark:'
             else
                 SLACK_JOBS_FIELDS_EMOJI=':no_entry_sign:'
@@ -347,7 +348,7 @@ GenerateJobsReport() {
 					"text": $job
 				  }
 				]')
-				((added_count++))
+				added_count=$((added_count + 1))
 			  fi
 			else
 			  break
