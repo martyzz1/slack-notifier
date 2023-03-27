@@ -335,8 +335,12 @@ GenerateJobsReport() {
 			if [ "$added_count" -lt 10 ]; then
 			  echo "added_count: $added_count"
 			  echo "success_count: $success_count"
+			  echo "JOB_STATUS: $JOB_STATUS"
 			  echo "WF_LENGTH: $WF_LENGTH - 10"
-			  if [ "$JOB_STATUS" = "failed" ] || ( [ "$JOB_STATUS" = "success" ] && "$((success_count))" -gt "$((WF_LENGTH - 10))" ); then
+			  #if [ "$JOB_STATUS" = "failed" ] || ( [ "$JOB_STATUS" = "success" ] && "$((success_count))" -gt "$((WF_LENGTH - 10))" ); then
+			  if [ "$JOB_STATUS" = "failed" ] || ( [ "$JOB_STATUS" = "success" ] && ((success_count > WF_LENGTH - 10)) ); then
+
+				echo "Adding Field to SLACK_JOBS_FIELD"
 				SLACK_JOBS_FIELDS=$(echo "$SLACK_JOBS_FIELDS" | jq --arg job "${SLACK_JOBS_FIELDS_EMOJI} *<${BUILD_URL}|$JOB_NAME>*" '. += [
 				  {
 					"type": "mrkdwn",
