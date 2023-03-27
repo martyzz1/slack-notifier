@@ -24,7 +24,6 @@ parameters:
     default: "broken"
   channel:
     type: string
-    default: "SLACK_CHANNEL"
     description: "Enter the slack Channel to post to (e.g. C15R5NJ7RM5)"
   workflow-name:
     type: string
