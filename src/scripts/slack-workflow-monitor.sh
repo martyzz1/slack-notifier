@@ -563,9 +563,12 @@ SendSlackReport() {
     #_RES=$(curl -sL -X POST -H 'Content-type: application/json' --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "${SLACK_WEBHOOK}")
     _RES=$(curl -sL -X POST -H 'Content-type: application/json' -H "Authorization: Bearer $SLACK_ACCESS_TOKEN" --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "https://slack.com/api/chat.postMessage")
     echo "RESULT $_RES"
-    if [ ! "$_RES" = "ok" ]; then
+	if echo "$_RES" | jq -e '.ok == true' > /dev/null; then
+  	  echo "Slack Message successful"
+	else
       exit 1
-    fi
+	fi
+
     echo "Slack status sent"
 
 }
