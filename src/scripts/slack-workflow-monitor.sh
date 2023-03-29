@@ -51,7 +51,7 @@ SlackMonitor() {
 	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
 		echo 'export CCI_STATUS="starting"' > /tmp/SLACK_JOB_STATUS
 		(
-			printf "Sending post process message"
+			printf "Sending post process message\n"
 			# shellcheck disable=SC2034
 			SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_STARTED"
 			# shellcheck disable=SC2034
@@ -72,7 +72,7 @@ SlackMonitor() {
 		if [ "$FINAL_STATUS" == "failed" ]; then
 			(
 				echo 'export CCI_STATUS="fail"' > /tmp/SLACK_JOB_STATUS
-				printf "Sending post process message"
+				printf "Sending post process message\n"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
 				# shellcheck disable=SC2034
@@ -84,7 +84,7 @@ SlackMonitor() {
 		else
 			(
 				echo 'export CCI_STATUS="pass"' > /tmp/SLACK_JOB_STATUS
-				printf "Sending post process message"
+				printf "Sending post process message\n"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
 				# shellcheck disable=SC2034
