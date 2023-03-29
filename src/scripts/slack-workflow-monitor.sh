@@ -56,6 +56,8 @@ SlackMonitor() {
 			SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_STARTED"
 			# shellcheck disable=SC2034
 			SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+			# shellcheck disable=SC2034
+			SLACK_PARAM_EVENT="always"
 			eval "$SLACK_SCRIPT_NOTIFY"
 		)
 		# shellcheck disable=SC2034
@@ -75,6 +77,8 @@ SlackMonitor() {
 				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_EVENT="fail"
 				eval "$SLACK_SCRIPT_NOTIFY"
 			)
 		else
@@ -85,6 +89,8 @@ SlackMonitor() {
 				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_EVENT="pass"
 				eval "$SLACK_SCRIPT_NOTIFY"
 			)
 		fi
