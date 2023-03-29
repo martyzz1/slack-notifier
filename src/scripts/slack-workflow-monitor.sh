@@ -46,9 +46,44 @@ SlackMonitor() {
     echo DATA_URL "${DATA_URL}"
     echo WF_DATA "${WF_DATA}"
 
+	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+		(
+			printf "Sending post process message"
+			# shellcheck disable=SC2034
+			SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_STARTED"
+			# shellcheck disable=SC2034
+			SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+			eval "$SLACK_SCRIPT_NOTIFY"
+		)
+		# shellcheck disable=SC2034
+		SLACK_POST_PROCESS_TS=$(cat /tmp/SLACK_TS)
+	fi
+
     RunWorkflowMonitor
     GenerateSlackMsg
     SendSlackReport
+
+	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+		if [ "$FINAL_STATUS" == "failed" ]; then
+			(
+				printf "Sending post process message"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+				eval "$SLACK_SCRIPT_NOTIFY"
+			)
+		else
+			(
+				printf "Sending post process message"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+				eval "$SLACK_SCRIPT_NOTIFY"
+			)
+		fi
+	fi
 }
 
 SetupVars() {
