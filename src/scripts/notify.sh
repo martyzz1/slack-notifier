@@ -73,7 +73,7 @@ PostToSlack() {
         fi
 		#########################################################################
 		# ADDED TO CROSS COMMUNICATE TS value
-        SLACK_MSG_TS=$(echo "$SLACK_SENT_RESPONSE" | jq '.ts')
+        SLACK_MSG_TS=$(echo "$SLACK_SENT_RESPONSE" | jq -r '.ts')
 		echo "$SLACK_MSG_TS" > /tmp/SLACK_TS
 		##########################################################################
     done
