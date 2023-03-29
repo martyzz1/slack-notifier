@@ -42,6 +42,10 @@ parameters:
       By default ".+" will be used to match all tags. Pattern must match the full string, no partial matches. (post-process-branch-pattern & post-process-tag-pattern are used in OR together)
     type: string
     default: ".+"
+  post-process-custom-image:
+    description: An image file to use as an accessory to the post-process-custom-message-*
+    type: string
+    default: "https://assets.brandfolder.com/otz5mn-bw4j2w-6jzqo8/original/circle-logo-badge-black.png"
   post-process-custom-message-started:
     description: |
       Enter a custom message template which will be sent to post-process-channel when the process starts.
@@ -100,6 +104,7 @@ steps:
         SLACK_SCRIPT_UTILS: "<<include(scripts/utils.sh)>>"
         SLACK_SCRIPT_NOTIFY: "<<include(scripts/notify.sh)>>"
         POST_PROCESS_CHANNEL: "<< parameters.post-process-channel >>"
+        POST_PROCESS_CUSTOM_IMAGE: "<< parameters.post-process-custom-image >>"
         POST_PROCESS_CUSTOM_MESSAGE_STARTED: "<< parameters.post-process-custom-message-started >>"
         POST_PROCESS_CUSTOM_MESSAGE_FAILED: "<< parameters.post-process-custom-message-failed >>"
         POST_PROCESS_CUSTOM_MESSAGE_PASSED: "<< parameters.post-process-custom-message-passed >>"
