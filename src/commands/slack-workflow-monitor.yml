@@ -70,13 +70,23 @@ parameters:
       3. Paste value here.
     type: string
     default: <<include(message_templates/post-process-failed.json)>>
-  post-process-mentions:
+  post-process-pass-mentions:
     description: |
+      Mention when the overall status is pass.
       Exports to the "$SLACK_PARAM_MENTIONS" environment variable for use in templates.
       Mention users via the @ symbol: "@USER"
       If the username contains a space, the Slack ID must be used with angled brackets: "<@U8XXXXXXX>"
     type: string
     default: ""
+  post-process-fail-mentions:
+    description: |
+      Mention when the overall status is fail.
+      Exports to the "$SLACK_PARAM_MENTIONS" environment variable for use in templates.
+      Mention users via the @ symbol: "@USER"
+      If the username contains a space, the Slack ID must be used with angled brackets: "<@U8XXXXXXX>"
+    type: string
+    default: ""
+
   circleci_host:
       description: |
        A CircleCI Host which used in a message template.
@@ -94,7 +104,6 @@ steps:
         GIPHY_FAILURE_KEYWORD: << parameters.giphy-failure-keyword>>
         WORKFLOW_NAME: << parameters.workflow-name >>
         SLACK_CHANNEL: << parameters.channel >>
-        SLACK_PARAM_MENTIONS: "<<parameters.post-process-mentions>>"
         SLACK_PARAM_BRANCHPATTERN: "<<parameters.post-process-branch-pattern>>"
         SLACK_PARAM_TAGPATTERN: "<<parameters.post-process-tag-pattern>>"
         SLACK_PARAM_CHANNEL: "<<parameters.post-process-channel>>"
@@ -108,6 +117,8 @@ steps:
         POST_PROCESS_CUSTOM_MESSAGE_STARTED: "<< parameters.post-process-custom-message-started >>"
         POST_PROCESS_CUSTOM_MESSAGE_FAILED: "<< parameters.post-process-custom-message-failed >>"
         POST_PROCESS_CUSTOM_MESSAGE_PASSED: "<< parameters.post-process-custom-message-passed >>"
+        POST_PROCESS_PASS_MENTIONS: "<<parameters.post-process-pass-mentions>>"
+        POST_PROCESS_FAIL_MENTIONS: "<<parameters.post-process-fail-mentions>>"
 
       name: Runnning Slack Workflow Monitor
       command: <<include(scripts/slack-workflow-monitor.sh)>>

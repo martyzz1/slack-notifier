@@ -71,8 +71,17 @@ parameters:
       3. Paste value here.
     type: string
     default: <<include(message_templates/post-process-failed.json)>>
-  post-process-mentions:
+  post-process-pass-mentions:
     description: |
+      Mention when the overall status is pass.
+      Exports to the "$SLACK_PARAM_MENTIONS" environment variable for use in templates.
+      Mention users via the @ symbol: "@USER"
+      If the username contains a space, the Slack ID must be used with angled brackets: "<@U8XXXXXXX>"
+    type: string
+    default: ""
+  post-process-fail-mentions:
+    description: |
+      Mention when the overall status is fail.
       Exports to the "$SLACK_PARAM_MENTIONS" environment variable for use in templates.
       Mention users via the @ symbol: "@USER"
       If the username contains a space, the Slack ID must be used with angled brackets: "<@U8XXXXXXX>"
@@ -96,7 +105,8 @@ steps:
       channel: << parameters.channel >>
       circleci_host: << parameters.circleci_host >>
       post-process-channel: << parameters.post-process-channel >>
-      post-process-mentions: << parameters.post-process-mentions >>
+      post-process-pass-mentions: << parameters.post-process-pass-mentions >>
+      post-process-fail-mentions: << parameters.post-process-fail-mentions >>
       post-process-branch-pattern: << parameters.post-process-branch-pattern >>
       post-process-tag-pattern: << parameters.post-process-tag-pattern >>
       post-process-custom-image: << parameters.post-process-custom-image >>
