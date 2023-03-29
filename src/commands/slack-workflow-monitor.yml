@@ -24,6 +24,60 @@ parameters:
   channel:
     type: string
     description: "Enter the slack Channel to post to (e.g. C15R5NJ7RM5)"
+  post-process-channel:
+    type: string
+    default: ""
+    description: |
+      (Optional) If configured, a small placeholder message will be posted to this channel when the workflow starts and the 'ts' id will added to the global environment Variables for this Build.
+      When the process has finished the message will be updated with an update
+  post-process-branch-pattern:
+    description: |
+      A comma separated list of regex matchable branch names. post-process-messages will only be sent if post-process-channel is configured and the job matches one of these branches.
+      By default ".+" will be used to match all branches. Pattern must match the full string, no partial matches. (post-process-branch-pattern & post-process-tag-pattern are used in OR together)
+    type: string
+    default: ".+"
+  post-process-tag-pattern:
+    description: |
+      A comma separated list of regex matchable tag names. post-process-messages will only be sent if post-process-channel is configured and the job matches one of these tags.
+      By default ".+" will be used to match all tags. Pattern must match the full string, no partial matches. (post-process-branch-pattern & post-process-tag-pattern are used in OR together)
+    type: string
+    default: ".+"
+  post-process-custom-message-started:
+    description: |
+      Enter a custom message template which will be sent to post-process-channel when the process starts.
+      1. Create your message template using the Block Kit Builder: https://app.slack.com/block-kit-builder/.
+      2. Insert any desired environment variables.
+      3. Paste value here.
+    type: string
+    default: <<include(message_templates/post-process-started.json)>>
+  post-process-custom-message-passed:
+    description: |
+      Enter a custom message template which will replace the post-process-custom-message-started message already sent to post-process-channel when the process Finishes in a successful state.
+      1. Create your message template using the Block Kit Builder: https://app.slack.com/block-kit-builder/.
+      2. Insert any desired environment variables.
+      3. Paste value here.
+    type: string
+    default: <<include(message_templates/post-process-passed.json)>>
+  post-process-custom-message-failed:
+    description: |
+      Enter a custom message template which will replace the post-process-custom-message-started message already sent to post-process-channel when the process Finishes but in a failed state.
+      1. Create your message template using the Block Kit Builder: https://app.slack.com/block-kit-builder/.
+      2. Insert any desired environment variables.
+      3. Paste value here.
+    type: string
+    default: <<include(message_templates/post-process-failed.json)>>
+  post-process-mentions:
+    description: |
+      Exports to the "$SLACK_PARAM_MENTIONS" environment variable for use in templates.
+      Mention users via the @ symbol: "@USER"
+      If the username contains a space, the Slack ID must be used with angled brackets: "<@U8XXXXXXX>"
+    type: string
+    default: ""
+  circleci_host:
+      description: |
+       A CircleCI Host which used in a message template.
+      type: string
+      default: https://circleci.com
 
   workflow-name:
     type: string
