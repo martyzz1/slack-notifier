@@ -71,6 +71,7 @@ SlackMonitor() {
 		echo "$SLACK_SCRIPT_NOTIFY"
 		printf "##############################\n"
 	fi
+	printf "GIT_TAG==%s" "$GIT_TAG"
 
     RunWorkflowMonitor
     GenerateSlackMsg
