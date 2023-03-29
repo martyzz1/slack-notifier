@@ -1,8 +1,6 @@
 description: >
-  Sample description
-# What will this job do?
-# Descriptions should be short, simple, and clear.
-
+  Runs a Monitoring process which sends a slack message Giving the final status of each workflow job, and optionally sends a pending/fail/pass message to another slack channel with a custom message.
+  This is typically used to notify a slack channel of a run that is starting, and then updates the message with the final result.
 parameters:
   circle-token:
     type: env_var_name
