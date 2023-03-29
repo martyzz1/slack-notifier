@@ -65,6 +65,10 @@ SlackMonitor() {
 		echo "SLACK_POST_PROCESS_TS=$SLACK_POST_PROCESS_TS"
 		# hack the notify.sh script to now use chat.update
 		SLACK_SCRIPT_NOTIFY="$(echo "$SLACK_SCRIPT_NOTIFY" | sed "/chat\.postMessage/chat.update/")"
+		printf "##############################\n"
+		printf "SLACK_SCRIPT_NOTIFY\n\n"
+		echo "$SLACK_SCRIPT_NOTIFY"
+		printf "##############################\n"
 	fi
 
     RunWorkflowMonitor
