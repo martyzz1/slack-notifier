@@ -5,198 +5,198 @@ description: >
 usage:
   version: 2.1
   orbs:
-    slacknotifier: martyzz1/slack-notifier@1.2.3
+    slacknotifier: martyzz1/slack-notifier@4.2.3
   workflows:
     use-my-orb:
       jobs:
         - slacknotifier/slack-workflow-monitor:
-          name: slacknotifier/slack-workflow-monitor-staging
-          workflow-name: use-my-orb
-          giphy-success-keyword: party
-          giphy-failure-keyword: broken
-          context: Slack Notifier
-          filters:
-            branches:
-              only: /main/
-            tags:
-              only: /.*/
-          channel: FR45T0LF53
-          post-process-channel: C0613GHIU72
-          post-process-custom-image: https://assets.brandfolder.com/otz5mn-bw4j2w-6jzqo8/original/circle-logo-badge-black.png
-          post-process-custom-message-started: |
-            {
-                "attachments": [
-                    {
-                        "blocks": [
-                            {
-                                "type": "header",
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Deployment Started",
-                                    "emoji": true
-                                }
-                            },
-                            {
-                                "type": "section",
-                                "fields": [
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*When*: $(date +'%d/%m/%Y %T')"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Tag*: ${CIRCLE_BRANCH}"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Tag*: ${CIRCLE_BUILD_NUM}"
-                                    }
-                                ],
-                                "accessory": {
-                                    "type": "image",
-                                    "image_url": "$POST_PROCESS_CUSTOM_IMAGE",
-                                    "alt_text": "CircleCI logo"
-                                }
-                            },
-                            {
-                                "type": "actions",
-                                "elements": [
-                                    {
-                                        "type": "button",
-                                        "action_id": "success_tagged_deploy_view",
-                                        "text": {
-                                            "type": "plain_text",
-                                            "text": "View Job"
-                                        },
-                                        "url": "${CIRCLE_BUILD_URL}"
-                                    }
-                                ]
-                            }
-                        ],
-                        "color": "#FFA500"
-                    }
-                ]
-            }
-          post-process-custom-message-passed: |
-            {
-                "attachments": [
-                    {
-                        "blocks": [
-                            {
-                                "type": "header",
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Deployment Successful! :tada:",
-                                    "emoji": true
-                                }
-                            },
-                            {
-                                "type": "section",
-                                "fields": [
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*When*: $(date +'%d/%m/%Y %T')"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Tag*: ${CIRCLE_BRANCH}"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Tag*: ${CIRCLE_BUILD_NUM}"
-                                    }
-                                ],
-                                "accessory": {
-                                    "type": "image",
-                                    "image_url": "$POST_PROCESS_CUSTOM_IMAGE",
-                                    "alt_text": "CircleCI logo"
-                                }
-                            },
-                            {
-                                "type": "actions",
-                                "elements": [
-                                    {
-                                        "type": "button",
-                                        "action_id": "success_tagged_deploy_view",
-                                        "text": {
-                                            "type": "plain_text",
-                                            "text": "View Job"
-                                        },
-                                        "url": "${CIRCLE_BUILD_URL}"
-                                    }
-                                ]
-                            }
-                        ],
-                        "color": "#2ECC40"
-                    }
-                ]
-            }
-          post-process-custom-message-failed: |
-            {
-                "attachments": [
-                    {
-                        "blocks": [
-                            {
-                                "type": "header",
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Deployment Failed! ",
-                                    "emoji": true
-                                }
-                            },
-                            {
-                                "type": "section",
-                                "fields": [
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*When*: $(date +'%d/%m/%Y %T')"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Tag*: ${CIRCLE_BRANCH}"
-                                    },
-                                    {
-                                        "type": "mrkdwn",
-                                        "text": "*Tag*: ${CIRCLE_BUILD_NUM}"
-                                    }
-                                ],
-                                "accessory": {
-                                    "type": "image",
-                                    "image_url": "$POST_PROCESS_CUSTOM_IMAGE",
-                                    "alt_text": "CircleCI logo"
-                                }
-                            },
-                            {
-                                "type": "actions",
-                                "elements": [
-                                    {
-                                        "type": "button",
-                                        "action_id": "success_tagged_deploy_view",
-                                        "text": {
-                                            "type": "plain_text",
-                                            "text": "View Job"
-                                        },
-                                        "url": "${CIRCLE_BUILD_URL}"
-                                    }
-                                ]
-                            }
-                        ],
-                        "color": "#FF4136"
-                    }
-                ]
-            }
+            name: slacknotifier/slack-workflow-monitor-staging
+            workflow-name: use-my-orb
+            giphy-success-keyword: party
+            giphy-failure-keyword: broken
+            context: Slack Notifier
+            filters:
+              branches:
+                only: /main/
+              tags:
+                only: /.*/
+            channel: FR45T0LF53
+            post-process-channel: C0613GHIU72
+            post-process-custom-image: https://assets.brandfolder.com/otz5mn-bw4j2w-6jzqo8/original/circle-logo-badge-black.png
+            post-process-custom-message-started: |
+              {
+                  "attachments": [
+                      {
+                          "blocks": [
+                              {
+                                  "type": "header",
+                                  "text": {
+                                      "type": "plain_text",
+                                      "text": "Deployment Started",
+                                      "emoji": true
+                                  }
+                              },
+                              {
+                                  "type": "section",
+                                  "fields": [
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*When*: $(date +'%d/%m/%Y %T')"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Tag*: ${CIRCLE_BRANCH}"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Tag*: ${CIRCLE_BUILD_NUM}"
+                                      }
+                                  ],
+                                  "accessory": {
+                                      "type": "image",
+                                      "image_url": "$POST_PROCESS_CUSTOM_IMAGE",
+                                      "alt_text": "CircleCI logo"
+                                  }
+                              },
+                              {
+                                  "type": "actions",
+                                  "elements": [
+                                      {
+                                          "type": "button",
+                                          "action_id": "success_tagged_deploy_view",
+                                          "text": {
+                                              "type": "plain_text",
+                                              "text": "View Job"
+                                          },
+                                          "url": "${CIRCLE_BUILD_URL}"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "color": "#FFA500"
+                      }
+                  ]
+              }
+            post-process-custom-message-passed: |
+              {
+                  "attachments": [
+                      {
+                          "blocks": [
+                              {
+                                  "type": "header",
+                                  "text": {
+                                      "type": "plain_text",
+                                      "text": "Deployment Successful! :tada:",
+                                      "emoji": true
+                                  }
+                              },
+                              {
+                                  "type": "section",
+                                  "fields": [
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*When*: $(date +'%d/%m/%Y %T')"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Tag*: ${CIRCLE_BRANCH}"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Tag*: ${CIRCLE_BUILD_NUM}"
+                                      }
+                                  ],
+                                  "accessory": {
+                                      "type": "image",
+                                      "image_url": "$POST_PROCESS_CUSTOM_IMAGE",
+                                      "alt_text": "CircleCI logo"
+                                  }
+                              },
+                              {
+                                  "type": "actions",
+                                  "elements": [
+                                      {
+                                          "type": "button",
+                                          "action_id": "success_tagged_deploy_view",
+                                          "text": {
+                                              "type": "plain_text",
+                                              "text": "View Job"
+                                          },
+                                          "url": "${CIRCLE_BUILD_URL}"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "color": "#2ECC40"
+                      }
+                  ]
+              }
+            post-process-custom-message-failed: |
+              {
+                  "attachments": [
+                      {
+                          "blocks": [
+                              {
+                                  "type": "header",
+                                  "text": {
+                                      "type": "plain_text",
+                                      "text": "Deployment Failed! ",
+                                      "emoji": true
+                                  }
+                              },
+                              {
+                                  "type": "section",
+                                  "fields": [
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*When*: $(date +'%d/%m/%Y %T')"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Tag*: ${CIRCLE_BRANCH}"
+                                      },
+                                      {
+                                          "type": "mrkdwn",
+                                          "text": "*Tag*: ${CIRCLE_BUILD_NUM}"
+                                      }
+                                  ],
+                                  "accessory": {
+                                      "type": "image",
+                                      "image_url": "$POST_PROCESS_CUSTOM_IMAGE",
+                                      "alt_text": "CircleCI logo"
+                                  }
+                              },
+                              {
+                                  "type": "actions",
+                                  "elements": [
+                                      {
+                                          "type": "button",
+                                          "action_id": "success_tagged_deploy_view",
+                                          "text": {
+                                              "type": "plain_text",
+                                              "text": "View Job"
+                                          },
+                                          "url": "${CIRCLE_BUILD_URL}"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "color": "#FF4136"
+                      }
+                  ]
+              }
         - build
         - lint
         - test
