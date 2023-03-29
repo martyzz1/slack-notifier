@@ -24,7 +24,7 @@ parameters:
     default: "broken"
   workflow-name:
     type: string
-  status-channel:
+  channel:
     type: string
     description: "Enter the slack Channel to post Summary information to (e.g. C15R5NJ7RM5)"
   post-process-channel:
