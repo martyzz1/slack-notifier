@@ -1,6 +1,6 @@
 description: >
   In this pattern, the full status update will be posted to channel "FR45T0LF53", when the entire process is complete.
-  As Placeholder message will be posted to "C0613GHIU72" Informing that a New deployment process has started.
+  A Placeholder message will be posted to "C0613GHIU72" Informing that a New deployment process has started.
   When the process has finished, this message will be updated with the final status.
 usage:
   version: 2.1
