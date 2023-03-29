@@ -71,6 +71,8 @@ SlackMonitor() {
 	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
 		if [ "$FINAL_STATUS" == "failed" ]; then
 			(
+				# Insert the default channel. THIS IS TEMPORARY
+
 				echo 'export CCI_STATUS="fail"' > /tmp/SLACK_JOB_STATUS
 				printf "Sending post process message\n"
 				# shellcheck disable=SC2034
@@ -79,6 +81,7 @@ SlackMonitor() {
 				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_EVENT="fail"
+    			SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq ". + {\"ts\": \"$SLACK_POST_PROCESS_TS\"}")"
 				eval "$SLACK_SCRIPT_NOTIFY"
 			)
 		else
@@ -91,6 +94,7 @@ SlackMonitor() {
 				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_EVENT="pass"
+    			SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq ". + {\"ts\": \"$SLACK_POST_PROCESS_TS\"}")"
 				eval "$SLACK_SCRIPT_NOTIFY"
 			)
 		fi
