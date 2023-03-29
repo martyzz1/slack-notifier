@@ -46,7 +46,10 @@ SlackMonitor() {
     echo DATA_URL "${DATA_URL}"
     echo WF_DATA "${WF_DATA}"
 
+	##############################################
+	##  Wrap around the circleci-slack orb Scripts
 	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+		echo 'export CCI_STATUS="starting"' > /tmp/SLACK_JOB_STATUS
 		(
 			printf "Sending post process message"
 			# shellcheck disable=SC2034
@@ -66,6 +69,7 @@ SlackMonitor() {
 	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
 		if [ "$FINAL_STATUS" == "failed" ]; then
 			(
+				echo 'export CCI_STATUS="fail"' > /tmp/SLACK_JOB_STATUS
 				printf "Sending post process message"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
@@ -75,6 +79,7 @@ SlackMonitor() {
 			)
 		else
 			(
+				echo 'export CCI_STATUS="pass"' > /tmp/SLACK_JOB_STATUS
 				printf "Sending post process message"
 				# shellcheck disable=SC2034
 				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
