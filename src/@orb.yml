@@ -1,7 +1,9 @@
 version: 2.1
 
 description: >
-  A Simple, hassle free, drop in replacement for the old Legacy Slack integration.
+  A Simple, hassle free, Slack integration, offering a better experience than the official plugin.
+  This code makes use of some of the official plugin, but under the hood, it runs a workflow monitoring job,
+  which allows it to trigger a simple pass or fail status message at the end of your workflow, as well as adding and updating status messages.
   Simply Add the invluded workflow to your project, and configure the following environment
   variables, and you will receive Slack notifications containing useful test result information
   including a random giphy image whenever tests enter, or leave a known state.
@@ -13,7 +15,10 @@ description: >
      * GIPHY_TOKEN
      * SLACK_ACCESS_TOKEN
 
-  Configure the SLACK_ACCESS_TOKEN in the same way as described by the official slack plugin
+  Configure the SLACK_ACCESS_TOKEN in the same way as described by the official slack plugin circleci/slack
+
+  New Feature Added, For creating and updating status notifications. E.g. When the process starts, post a message to a
+  status channel, and then update it if the overall workflow status is a pass or fail.
 
 # This information will be displayed in the orb registry and is not mandatory.
 display:
