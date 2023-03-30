@@ -46,9 +46,72 @@ SlackMonitor() {
     echo DATA_URL "${DATA_URL}"
     echo WF_DATA "${WF_DATA}"
 
+	##############################################
+	##  Wrap around the circleci-slack orb Scripts
+	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+		echo 'export CCI_STATUS="starting"' > /tmp/SLACK_JOB_STATUS
+		(
+			printf "Sending post process message\n"
+			# shellcheck disable=SC2034
+			SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_STARTED"
+			# shellcheck disable=SC2034
+			SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+			# shellcheck disable=SC2034
+			SLACK_PARAM_EVENT="always"
+			eval "$SLACK_SCRIPT_NOTIFY"
+		)
+		# shellcheck disable=SC2034
+		SLACK_POST_PROCESS_TS=$(cat /tmp/SLACK_TS)
+		echo "SLACK_POST_PROCESS_TS=$SLACK_POST_PROCESS_TS"
+		# hack the notify.sh script to now use chat.update
+		#shellcheck disable=SC2001
+		SLACK_SCRIPT_NOTIFY="$(echo "$SLACK_SCRIPT_NOTIFY" | sed "s/chat\.postMessage/chat.update/")"
+		printf "##############################\n"
+		printf "SLACK_SCRIPT_NOTIFY\n\n"
+		echo "$SLACK_SCRIPT_NOTIFY"
+		printf "##############################\n"
+	fi
+	printf "GIT_TAG==%s" "$GIT_TAG"
+
     RunWorkflowMonitor
     GenerateSlackMsg
     SendSlackReport
+
+	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+		if [ "$FINAL_STATUS" == "failed" ]; then
+			(
+				# Insert the default channel. THIS IS TEMPORARY
+
+				echo 'export CCI_STATUS="fail"' > /tmp/SLACK_JOB_STATUS
+				printf "Sending post process message\n"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_EVENT="fail"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_MENTIONS="$POST_PROCESS_FAIL_MENTIONS"
+    			SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "$SLACK_POST_PROCESS_TS"}')"
+				eval "$SLACK_SCRIPT_NOTIFY"
+			)
+		else
+			(
+				echo 'export CCI_STATUS="pass"' > /tmp/SLACK_JOB_STATUS
+				printf "Sending post process message\n"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_EVENT="pass"
+				# shellcheck disable=SC2034
+				SLACK_PARAM_MENTIONS="$POST_PROCESS_PASS_MENTIONS"
+    			SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "$SLACK_POST_PROCESS_TS"}')"
+				eval "$SLACK_SCRIPT_NOTIFY"
+			)
+		fi
+	fi
 }
 
 SetupVars() {
@@ -563,9 +626,12 @@ SendSlackReport() {
     #_RES=$(curl -sL -X POST -H 'Content-type: application/json' --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "${SLACK_WEBHOOK}")
     _RES=$(curl -sL -X POST -H 'Content-type: application/json' -H "Authorization: Bearer $SLACK_ACCESS_TOKEN" --no-keepalive  --data "${SLACK_MSG_ATTACHMENT}" "https://slack.com/api/chat.postMessage")
     echo "RESULT $_RES"
-    if [ ! "$_RES" = "ok" ]; then
+	if echo "$_RES" | jq -e '.ok == true' > /dev/null; then
+  	  echo "Slack Message successful"
+	else
       exit 1
-    fi
+	fi
+
     echo "Slack status sent"
 
 }

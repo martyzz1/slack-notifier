@@ -1,0 +1,53 @@
+{
+  "attachments": [
+	  {
+		  "blocks": [
+			  {
+				  "type": "header",
+				  "text": {
+					  "type": "plain_text",
+					  "text": "Deployment Started",
+					  "emoji": true
+				  }
+			  },
+			  {
+				  "type": "section",
+				  "fields": [
+					  {
+						  "type": "mrkdwn",
+						  "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
+					  },
+					  {
+						  "type": "mrkdwn",
+						  "text": "*When*: $(date +'%d/%m/%Y %T')"
+					  }
+				  ]
+			  },
+              {
+                  "type": "section",
+                  "fields": [
+                      {
+                          "type": "mrkdwn",
+                          "text": "*Mentions*: $SLACK_PARAM_MENTIONS"
+                      }
+                  ]
+              },
+			  {
+				  "type": "actions",
+				  "elements": [
+					  {
+						  "type": "button",
+						  "action_id": "success_tagged_deploy_view",
+						  "text": {
+							  "type": "plain_text",
+							  "text": "View Job"
+						  },
+						  "url": "${CIRCLE_BUILD_URL}"
+					  }
+				  ]
+			  }
+		  ],
+		  "color": "warning"
+	  }
+  ]
+}
