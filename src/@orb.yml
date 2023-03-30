@@ -3,8 +3,9 @@ version: 2.1
 description: >
   A Simple, hassle free, Slack integration, offering a better experience than the official plugin.
   This code makes use of some of the official plugin, but under the hood, it runs a workflow monitoring job,
-  which allows it to trigger a simple pass or fail status message at the end of your workflow, as well as adding and updating status messages.
-  Simply Add the invluded workflow to your project, and configure the following environment
+  which allows it to trigger a simple pass or fail status message at the end of your workflow, as well as adding and updating status messages as you go. E.g. This plugin allows you to have an overall pass/fail Test notification, alerting your dev team to newly introduced or newly fixed bugs. It also allows your ops team to see what deployment processes are running and if they are succsessful or failing.
+
+  Simply add the included job to your project (near or at the start), and configure the following environment
   variables, and you will receive Slack notifications containing useful test result information
   including a random giphy image whenever tests enter, or leave a known state.
 
