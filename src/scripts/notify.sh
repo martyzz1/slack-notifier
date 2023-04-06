@@ -106,6 +106,7 @@ InstallJq() {
 
 FilterBy() {
     if [ -z "$1" ] || [ -z "$2" ]; then
+	  echo "FilterBy returning empty"
       return
     fi
 
@@ -113,6 +114,7 @@ FilterBy() {
     FLAG_MATCHES_FILTER="false"
     for i in $(echo "$1" | sed "s/,/ /g"); do
         if echo "$2" | grep -Eq "^${i}$"; then
+			echo "Filter matches $2"
             FLAG_MATCHES_FILTER="true"
             break
         fi
@@ -127,6 +129,8 @@ FilterBy() {
         echo "Current reference \"$2\" does not match any matching parameter"
         echo "Current matching pattern: $1"
         exit 0
+	else
+		echo "We have a matching Branch pattern so all is good $1 && $2"
     fi
 }
 
