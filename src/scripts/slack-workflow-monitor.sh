@@ -112,11 +112,12 @@ SlackMonitor() {
 					SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_CHANNEL="${SLACK_PARAM_CHANNELS[$i]}"
+					ts="${SLACK_POST_PROCESS_TS[$i]}"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_EVENT="fail"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_MENTIONS="$POST_PROCESS_FAIL_MENTIONS"
-					SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "${SLACK_POST_PROCESS_TS[$i]}"}')"
+					SLACK_PARAM_CUSTOM=$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq ". + {'ts': '$ts}'}")
 					eval "$SLACK_SCRIPT_NOTIFY"
 				)
 			else
@@ -127,11 +128,12 @@ SlackMonitor() {
 					SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_CHANNEL="${SLACK_PARAM_CHANNELS[$i]}"
+					ts="${SLACK_POST_PROCESS_TS[$i]}"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_EVENT="pass"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_MENTIONS="$POST_PROCESS_PASS_MENTIONS"
-					SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "${SLACK_POST_PROCESS_TS[$i]}"}')"
+					SLACK_PARAM_CUSTOM=$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq ". + {'ts': '$ts}'}")
 					eval "$SLACK_SCRIPT_NOTIFY"
 				)
 			fi
