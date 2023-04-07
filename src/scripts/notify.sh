@@ -75,6 +75,7 @@ PostToSlack() {
 		# ADDED TO CROSS COMMUNICATE TS value
         SLACK_MSG_TS=$(echo "$SLACK_SENT_RESPONSE" | jq -r '.ts')
 		SLACK_POST_PROCESS_TS_CSV="${SLACK_POST_PROCESS_TS_CSV:+$SLACK_POST_PROCESS_TS_CSV,}$SLACK_MSG_TS"
+		echo "SLACK_MSG_TS=$SLACK_MSG_TS for channel=$i"
 		echo "$SLACK_POST_PROCESS_TS_CSV" > /tmp/SLACK_TS
 		##########################################################################
     done
