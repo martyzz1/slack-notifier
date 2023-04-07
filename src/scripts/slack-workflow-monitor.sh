@@ -56,7 +56,7 @@ SlackMonitor() {
         #echo "$SLACK_MSG_TS," >> /tmp/SLACK_TS
         ###########################################################################
 
-	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+	if [ "$POST_PROCESS_CHANNELS" != "" ]; then
 		cat /dev/null > /tmp/SLACK_TS
 		echo 'export CCI_STATUS="starting"' > /tmp/SLACK_JOB_STATUS
 		(
@@ -89,7 +89,7 @@ SlackMonitor() {
     GenerateSlackMsg
     SendSlackReport
 
-	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+	if [ "$POST_PROCESS_CHANNELS" != "" ]; then
 		IFS=',' read -ra SLACK_PARAM_CHANNELS <<< "$POST_PROCESS_CHANNELS"
 		IFS=',' read -ra SLACK_POST_PROCESS_TS <<< "$SLACK_POST_PROCESS_TS_CSV"
 
