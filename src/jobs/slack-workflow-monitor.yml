@@ -29,8 +29,7 @@ parameters:
     type: string
     default: ""
     description: |
-      (Optional) If configured, a small placeholder message will be posted to this channel when the workflow starts and the 'ts' id will added to the global environment Variables for this Build.
-      When the process has finished the message will be updated with an update
+      (Optional) A comma separated list of channel id's. If configured, a small placeholder message will be posted to the channels specified when the workflow start. When the process has finished the message will be updated with a fail/success message
   post-process-branch-pattern:
     description: |
       A comma separated list of regex matchable branch names. post-process-messages will only be sent if post-process-channel is configured and the job matches one of these branches.
