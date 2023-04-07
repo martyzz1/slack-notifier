@@ -106,13 +106,13 @@ steps:
         SLACK_CHANNEL: << parameters.channel >>
         SLACK_PARAM_BRANCHPATTERN: "<<parameters.post-process-branch-pattern>>"
         SLACK_PARAM_TAGPATTERN: "<<parameters.post-process-tag-pattern>>"
-        SLACK_PARAM_CHANNEL: "<<parameters.post-process-channel>>"
+        #SLACK_PARAM_CHANNEL: "<<parameters.post-process-channel>>"
         SLACK_PARAM_IGNORE_ERRORS: false
         SLACK_PARAM_DEBUG: true
         SLACK_PARAM_CIRCLECI_HOST: "<<parameters.circleci_host>>"
         SLACK_SCRIPT_UTILS: "<<include(scripts/utils.sh)>>"
         SLACK_SCRIPT_NOTIFY: "<<include(scripts/notify.sh)>>"
-        POST_PROCESS_CHANNEL: "<< parameters.post-process-channel >>"
+        POST_PROCESS_CHANNELS: "<< parameters.post-process-channel >>"
         POST_PROCESS_CUSTOM_IMAGE: "<< parameters.post-process-custom-image >>"
         POST_PROCESS_CUSTOM_MESSAGE_STARTED: "<< parameters.post-process-custom-message-started >>"
         POST_PROCESS_CUSTOM_MESSAGE_FAILED: "<< parameters.post-process-custom-message-failed >>"

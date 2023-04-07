@@ -48,21 +48,33 @@ SlackMonitor() {
 
 	##############################################
 	##  Wrap around the circleci-slack orb Scripts
+	# We must add the following to the end of the PostToSlack() function in notify.sh
+
+	    ##########################################################################
+        ## ADDED TO CROSS COMMUNICATE TS value
+        #SLACK_MSG_TS=$(echo "$SLACK_SENT_RESPONSE" | jq -r '.ts')
+        #echo "$SLACK_MSG_TS," >> /tmp/SLACK_TS
+        ###########################################################################
+
 	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
+		cat /dev/null > /tmp/SLACK_TS
 		echo 'export CCI_STATUS="starting"' > /tmp/SLACK_JOB_STATUS
 		(
 			printf "Sending post process message\n"
 			# shellcheck disable=SC2034
 			SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_STARTED"
-			# shellcheck disable=SC2034
-			SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
+
+			# Here we are safe to send them all as original csv pass through
+			# shellcheck disable=SC2034,SC2030
+			SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNELS"
+
 			# shellcheck disable=SC2034
 			SLACK_PARAM_EVENT="always"
 			eval "$SLACK_SCRIPT_NOTIFY"
 		)
 		# shellcheck disable=SC2034
-		SLACK_POST_PROCESS_TS=$(cat /tmp/SLACK_TS)
-		echo "SLACK_POST_PROCESS_TS=$SLACK_POST_PROCESS_TS"
+		SLACK_POST_PROCESS_TS_CSV=$(cat /tmp/SLACK_TS)
+		echo "SLACK_POST_PROCESS_TS=$SLACK_POST_PROCESS_TS_CSV"
 		# hack the notify.sh script to now use chat.update
 		#shellcheck disable=SC2001
 		SLACK_SCRIPT_NOTIFY="$(echo "$SLACK_SCRIPT_NOTIFY" | sed "s/chat\.postMessage/chat.update/")"
@@ -78,39 +90,46 @@ SlackMonitor() {
     SendSlackReport
 
 	if [ "$POST_PROCESS_CHANNEL" != "" ]; then
-		if [ "$FINAL_STATUS" == "failed" ]; then
-			(
-				# Insert the default channel. THIS IS TEMPORARY
+		IFS=',' read -ra SLACK_PARAM_CHANNELS <<< "$POST_PROCESS_CHANNELS"
+		IFS=',' read -ra SLACK_POST_PROCESS_TS <<< "$SLACK_POST_PROCESS_TS_CSV"
 
-				echo 'export CCI_STATUS="fail"' > /tmp/SLACK_JOB_STATUS
-				printf "Sending post process message\n"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_EVENT="fail"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_MENTIONS="$POST_PROCESS_FAIL_MENTIONS"
-    			SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "$SLACK_POST_PROCESS_TS"}')"
-				eval "$SLACK_SCRIPT_NOTIFY"
-			)
-		else
-			(
-				echo 'export CCI_STATUS="pass"' > /tmp/SLACK_JOB_STATUS
-				printf "Sending post process message\n"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_CHANNEL="$POST_PROCESS_CHANNEL"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_EVENT="pass"
-				# shellcheck disable=SC2034
-				SLACK_PARAM_MENTIONS="$POST_PROCESS_PASS_MENTIONS"
-    			SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "$SLACK_POST_PROCESS_TS"}')"
-				eval "$SLACK_SCRIPT_NOTIFY"
-			)
-		fi
+		for i in "${!SLACK_PARAM_CHANNELS[@]}"; do
+    		echo "The ts of ${SLACK_PARAM_CHANNELS[$i]} is ${SLACK_POST_PROCESS_TS[$i]}"
+
+			if [ "$FINAL_STATUS" == "failed" ]; then
+				(
+					# Insert the default channel. THIS IS TEMPORARY
+
+					echo 'export CCI_STATUS="fail"' > /tmp/SLACK_JOB_STATUS
+					printf "Sending post process message\n"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_FAILED"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_CHANNEL="${SLACK_PARAM_CHANNELS[$i]}"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_EVENT="fail"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_MENTIONS="$POST_PROCESS_FAIL_MENTIONS"
+					SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "${SLACK_POST_PROCESS_TS[$i]}"}')"
+					eval "$SLACK_SCRIPT_NOTIFY"
+				)
+			else
+				(
+					echo 'export CCI_STATUS="pass"' > /tmp/SLACK_JOB_STATUS
+					printf "Sending post process message\n"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_CUSTOM="$POST_PROCESS_CUSTOM_MESSAGE_PASSED"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_CHANNEL="${SLACK_PARAM_CHANNELS[$i]}"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_EVENT="pass"
+					# shellcheck disable=SC2034
+					SLACK_PARAM_MENTIONS="$POST_PROCESS_PASS_MENTIONS"
+					SLACK_PARAM_CUSTOM="$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq '. + {"ts": "${SLACK_POST_PROCESS_TS[$i]}"}')"
+					eval "$SLACK_SCRIPT_NOTIFY"
+				)
+			fi
+		done
 	fi
 }
 
