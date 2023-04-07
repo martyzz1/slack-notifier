@@ -60,7 +60,7 @@ SlackMonitor() {
 	if [ "$POST_PROCESS_CHANNELS" != "" ]; then
 		###############################################################
 		#### these two are used in the custom code inside notify.sh####
-		SLACK_POST_PROCESS_TS_CSV=""
+		# SLACK_POST_PROCESS_TS_CSV=""
 		################################################################
 		echo 'export CCI_STATUS="starting"' > /tmp/SLACK_JOB_STATUS
 		(
@@ -76,16 +76,20 @@ SlackMonitor() {
 			SLACK_PARAM_EVENT="always"
 			eval "$SLACK_SCRIPT_NOTIFY"
 		)
-		# shellcheck disable=SC2034
-		SLACK_POST_PROCESS_TS_CSV=$(cat /tmp/SLACK_TS)
-		echo "SLACK_POST_PROCESS_TS_CSV=$SLACK_POST_PROCESS_TS_CSV"
-		# hack the notify.sh script to now use chat.update
-		#shellcheck disable=SC2001
-		SLACK_SCRIPT_NOTIFY="$(echo "$SLACK_SCRIPT_NOTIFY" | sed "s/chat\.postMessage/chat.update/")"
-		printf "##############################\n"
-		printf "SLACK_SCRIPT_NOTIFY\n\n"
-		echo "$SLACK_SCRIPT_NOTIFY"
-		printf "##############################\n"
+		if [ -f "/tmp/SLACK_TS" ]; then
+			# shellcheck disable=SC2034
+			SLACK_POST_PROCESS_TS_CSV=$(cat /tmp/SLACK_TS)
+			echo "SLACK_POST_PROCESS_TS_CSV=$SLACK_POST_PROCESS_TS_CSV"
+			# hack the notify.sh script to now use chat.update
+			#shellcheck disable=SC2001
+			SLACK_SCRIPT_NOTIFY="$(echo "$SLACK_SCRIPT_NOTIFY" | sed "s/chat\.postMessage/chat.update/")"
+			printf "##############################\n"
+			printf "SLACK_SCRIPT_NOTIFY\n\n"
+			echo "$SLACK_SCRIPT_NOTIFY"
+			printf "##############################\n"
+		else
+			echo "No post processing messages matched filters, Nothing to do"
+		fi
 	fi
 	printf "GIT_TAG==%s" "$GIT_TAG"
 
