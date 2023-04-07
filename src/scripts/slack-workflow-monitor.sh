@@ -117,7 +117,8 @@ SlackMonitor() {
 					SLACK_PARAM_EVENT="fail"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_MENTIONS="$POST_PROCESS_FAIL_MENTIONS"
-					SLACK_PARAM_CUSTOM=$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq ". + {'ts': '$ts}'}")
+					SLACK_PARAM_CUSTOM="$(printf "%s" "$SLACK_PARAM_CUSTOM" | jq ". + {\"ts\": \"$ts\"}")"
+
 					eval "$SLACK_SCRIPT_NOTIFY"
 				)
 			else
@@ -133,7 +134,7 @@ SlackMonitor() {
 					SLACK_PARAM_EVENT="pass"
 					# shellcheck disable=SC2034
 					SLACK_PARAM_MENTIONS="$POST_PROCESS_PASS_MENTIONS"
-					SLACK_PARAM_CUSTOM=$(printf '%s' "$SLACK_PARAM_CUSTOM" | jq ". + {'ts': '$ts}'}")
+					SLACK_PARAM_CUSTOM="$(printf "%s" "$SLACK_PARAM_CUSTOM" | jq ". + {\"ts\": \"$ts\"}")"
 					eval "$SLACK_SCRIPT_NOTIFY"
 				)
 			fi
