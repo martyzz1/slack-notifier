@@ -50,14 +50,18 @@ SlackMonitor() {
 	##  Wrap around the circleci-slack orb Scripts
 	# We must add the following to the end of the PostToSlack() function in notify.sh
 
-	    ##########################################################################
-        ## ADDED TO CROSS COMMUNICATE TS value
-        #SLACK_MSG_TS=$(echo "$SLACK_SENT_RESPONSE" | jq -r '.ts')
-        #echo "$SLACK_MSG_TS," >> /tmp/SLACK_TS
-        ###########################################################################
+		#########################################################################
+        # ADDED TO CROSS COMMUNICATE TS values
+        # SLACK_MSG_TS=$(echo "$SLACK_SENT_RESPONSE" | jq -r '.ts')
+        # SLACK_POST_PROCESS_TS_CSV="${SLACK_POST_PROCESS_TS_CSV:+$SLACK_POST_PROCESS_TS_CSV,}$SLACK_MSG_TS"
+        # echo "$SLACK_POST_PROCESS_TS_CSV" > /tmp/SLACK_TS
+        ##########################################################################
 
 	if [ "$POST_PROCESS_CHANNELS" != "" ]; then
-		cat /dev/null > /tmp/SLACK_TS
+		###############################################################
+		#### these two are used in the custom code inside notify.sh####
+		#SLACK_POST_PROCESS_TS_CSV=""
+		################################################################
 		echo 'export CCI_STATUS="starting"' > /tmp/SLACK_JOB_STATUS
 		(
 			printf "Sending post process message\n"

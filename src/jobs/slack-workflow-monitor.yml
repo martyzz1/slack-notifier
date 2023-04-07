@@ -42,6 +42,14 @@ parameters:
       By default ".+" will be used to match all tags. Pattern must match the full string, no partial matches. (post-process-branch-pattern & post-process-tag-pattern are used in OR together)
     type: string
     default: ".+"
+  post-process-invert-match:
+    default: false
+    description: >
+      Invert the post-process-branch-pattern and post-process-tag-pattern patterns.
+
+      If set to true, notifications will only be sent if sent from a job from
+      branches and tags that do not match the patterns.
+    type: boolean
   post-process-custom-image:
     description: An image file to use as an accessory to the post-process-custom-message-*
     type: string
@@ -108,6 +116,7 @@ steps:
       post-process-fail-mentions: << parameters.post-process-fail-mentions >>
       post-process-branch-pattern: << parameters.post-process-branch-pattern >>
       post-process-tag-pattern: << parameters.post-process-tag-pattern >>
+      post-process-invert-match: << parameters.post-process-invert-match >>
       post-process-custom-image: << parameters.post-process-custom-image >>
       post-process-custom-message-started: << parameters.post-process-custom-message-started >>
       post-process-custom-message-failed: << parameters.post-process-custom-message-failed >>

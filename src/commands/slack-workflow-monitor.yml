@@ -42,6 +42,14 @@ parameters:
       By default ".+" will be used to match all tags. Pattern must match the full string, no partial matches. (post-process-branch-pattern & post-process-tag-pattern are used in OR together)
     type: string
     default: ".+"
+  post-process-invert-match:
+    default: false
+    description: >
+      Invert the post-process-branch-pattern and post-process-tag-pattern patterns.
+
+      If set to true, notifications will only be sent if sent from a job from
+      branches and tags that do not match the patterns.
+    type: boolean
   post-process-custom-image:
     description: An image file to use as an accessory to the post-process-custom-message-*
     type: string
@@ -106,7 +114,7 @@ steps:
         SLACK_CHANNEL: << parameters.channel >>
         SLACK_PARAM_BRANCHPATTERN: "<<parameters.post-process-branch-pattern>>"
         SLACK_PARAM_TAGPATTERN: "<<parameters.post-process-tag-pattern>>"
-        #SLACK_PARAM_CHANNEL: "<<parameters.post-process-channel>>"
+        SLACK_PARAM_INVERT_MATCH: "<<parameters.post-process-invert-match>>"
         SLACK_PARAM_IGNORE_ERRORS: false
         SLACK_PARAM_DEBUG: true
         SLACK_PARAM_CIRCLECI_HOST: "<<parameters.circleci_host>>"
