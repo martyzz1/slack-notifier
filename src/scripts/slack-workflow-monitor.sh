@@ -154,6 +154,7 @@ SetupVars() {
     GIT_NO_COMMITS=$(git rev-list HEAD --count)
     CIRCLE_WORKFLOW_URL="https://app.circleci.com/pipelines/workflows/${CIRCLE_WORKFLOW_ID}"
     DATA_URL="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?circle-token=${CIRCLE_TOKEN}"
+    WORKFLOW_DATA_URL="https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}?circle-token=${CIRCLE_TOKEN}"
 
     PROJECT_SLUG=${CIRCLE_BUILD_URL#https://circleci.com/}
     PROJECT_SLUG=${PROJECT_SLUG%/*}
@@ -171,6 +172,8 @@ SetupGiphyVars() {
 }
 
 SetupPreviousBuildVars() {
+    WORKFLOW_DATA=$(curl -sL "$WORKFLOW_DATA_URL")
+    WORKFLOW_NAME=$(echo "$WORKFLOW_DATA" | jq '.name')
     local PREVIOUS_BUILD_URL="https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
 
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
