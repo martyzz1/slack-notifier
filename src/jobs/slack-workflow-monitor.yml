@@ -20,8 +20,6 @@ parameters:
   giphy-failure-keyword:
     type: string
     default: "broken"
-  workflow-name:
-    type: string
   channel:
     type: string
     description: "Enter the slack Channel to post Summary information to (e.g. C15R5NJ7RM5)"
@@ -106,7 +104,6 @@ environment:
 
 steps:
   - slack-workflow-monitor:
-      workflow-name: << parameters.workflow-name >>
       giphy-success-keyword: << parameters.giphy-success-keyword >>
       giphy-failure-keyword: << parameters.giphy-failure-keyword >>
       channel: << parameters.channel >>

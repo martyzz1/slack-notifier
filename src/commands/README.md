@@ -28,15 +28,12 @@ parameters:
   channel:
     type: string
     description: "Enter your slack channel"
-  workflow-name:
-    type: string
 
 steps:
   - run:
       environment:
         GIPHY_SUCCESS_KEYWORD: << parameters.giphy-success-keyword>>"
         GIPHY_FAILURE_KEYWORD: << parameters.giphy-failure-keyword>>"
-        WORKFLOW_NAME: << parameters.workflow-name >>"
 
       name: Runnning Slack Workflow Monitor
       command: <<include(scripts/slack-workflow-monitor.sh)>>

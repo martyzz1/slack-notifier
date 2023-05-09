@@ -101,16 +101,12 @@ parameters:
       type: string
       default: https://circleci.com
 
-  workflow-name:
-    type: string
-
 steps:
   - checkout
   - run:
       environment:
         GIPHY_SUCCESS_KEYWORD: << parameters.giphy-success-keyword>>
         GIPHY_FAILURE_KEYWORD: << parameters.giphy-failure-keyword>>
-        OLD_WORKFLOW_NAME: << parameters.workflow-name >>
         SLACK_CHANNEL: << parameters.channel >>
         SLACK_PARAM_BRANCHPATTERN: "<<parameters.post-process-branch-pattern>>"
         SLACK_PARAM_TAGPATTERN: "<<parameters.post-process-tag-pattern>>"

@@ -10,7 +10,6 @@ usage:
     use-my-orb:
       jobs:
         - slacknotifier/slack-workflow-monitor:
-            workflow-name: use-my-orb
             giphy-success-keyword: party
             giphy-failure-keyword: broken
             channel: FR45T0LF53
