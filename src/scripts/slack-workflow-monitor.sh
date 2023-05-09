@@ -173,15 +173,13 @@ SetupGiphyVars() {
 
 SetupPreviousBuildVars() {
     WORKFLOW_DATA=$(curl -sL "$WORKFLOW_DATA_URL")
-    WORKFLOW_NAME=$(echo "$WORKFLOW_DATA" | jq '.name')
+    WORKFLOW_NAME=$(echo "$WORKFLOW_DATA" | jq -r '.name')
     local PREVIOUS_BUILD_URL="https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
 
     echo "Getting last known PREVIOUS_BUILD_STATUS from $PREVIOUS_BUILD_URL"
     # yamllint disable rule:line-length
 
     local PREVIOUS_BUILD_DATA
-    echo " PREVIOUS_BUILD_STATUS $PREVIOUS_BUILD_STATUS"
-    echo "PREVIOUS_BUILD_DATA $PREVIOUS_BUILD_DATA"
     echo "PREVIOUS_BUILD_URL $PREVIOUS_BUILD_URL"
 
     PREVIOUS_BUILD_DATA=$(curl -sL GET "$PREVIOUS_BUILD_URL" \
