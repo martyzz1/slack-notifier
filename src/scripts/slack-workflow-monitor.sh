@@ -25,8 +25,10 @@ SlackMonitor() {
 
     SetupVars
     ValidateWorkflow
+    echo CIRCLE_TOKEN "${CIRCLE_TOKEN}"
     echo CIRCLE_BRANCH "${CIRCLE_BRANCH}"
     echo CIRCLE_SHA1 "${CIRCLE_SHA1}"
+    echo GIPHY_TOKEN "${GIPHY_TOKEN}"
     echo SLACK_CHANNEL "${SLACK_CHANNEL}"
     echo GIPHY_SUCCESS_KEYWORD "${GIPHY_SUCCESS_KEYWORD}"
     echo GIPHY_FAILURE_KEYWORD "${GIPHY_FAILURE_KEYWORD}"
@@ -42,6 +44,7 @@ SlackMonitor() {
     echo SUCCESS_GIF "${SUCCESS_GIF}"
     echo FAIL_GIF "${FAIL_GIF}"
     echo DATA_URL "${DATA_URL}"
+    echo WF_DATA "${WF_DATA}"
 
 	##############################################
 	##  Wrap around the circleci-slack orb Scripts
@@ -143,55 +146,6 @@ SlackMonitor() {
 	fi
 }
 
-CIRCLECI_API_ATTEMPTS=${CIRCLECI_API_ATTEMPTS:-5}
-CIRCLECI_API_RETRY_DELAY=${CIRCLECI_API_RETRY_DELAY:-5}
-
-# Prints the JSON body of a CircleCI API GET. Network errors, HTTP 429, 5xx and non-JSON
-# bodies are retried; any other non-2xx status (e.g. a rejected token) fails immediately.
-CircleApiGet() {
-    local url=$1
-    local attempt=1
-    local response
-    local status
-    local body
-    while true
-    do
-      response=$(curl -sL --max-time 30 -w '\n%{http_code}' \
-        --header "Circle-Token: ${CIRCLE_TOKEN}" \
-        --header 'Accept: application/json' \
-        "$url") || response=$'\n000'
-      status=${response##*$'\n'}
-      body=${response%$'\n'*}
-
-      if [[ "$status" == 2* ]] && echo "$body" | jq -e . > /dev/null 2>&1; then
-        printf '%s' "$body"
-        return 0
-      fi
-      if [[ "$status" != 2* && "$status" != 000 && "$status" != 429 && "$status" != 5* ]]; then
-        echo "CircleCI API returned HTTP $status for $url: $body" >&2
-        return 1
-      fi
-      if [ "$attempt" -ge "$CIRCLECI_API_ATTEMPTS" ]; then
-        echo "CircleCI API still failing after $attempt attempts (last HTTP $status) for $url" >&2
-        return 1
-      fi
-      echo "CircleCI API returned HTTP $status for $url, retrying in ${CIRCLECI_API_RETRY_DELAY}s ($attempt/$CIRCLECI_API_ATTEMPTS)" >&2
-      sleep "$CIRCLECI_API_RETRY_DELAY"
-      attempt=$((attempt + 1))
-    done
-}
-
-# Prints the jobs in this workflow as a JSON array.
-GetWorkflowJobs() {
-    local data
-    data=$(CircleApiGet "$DATA_URL") || return 1
-    if ! echo "$data" | jq -e '.items | type == "array"' > /dev/null; then
-      echo "CircleCI returned no job list for workflow $CIRCLE_WORKFLOW_ID: $data" >&2
-      return 1
-    fi
-    echo "$data" | jq '.items'
-}
-
 SetupVars() {
     #https://stackoverflow.com/questions/8903239/how-to-calculate-time-elapsed-in-bash-script
     SECONDS=0
@@ -199,8 +153,8 @@ SetupVars() {
 	echo "TTTT"
     GIT_NO_COMMITS=$(git rev-list HEAD --count)
     CIRCLE_WORKFLOW_URL="https://app.circleci.com/pipelines/workflows/${CIRCLE_WORKFLOW_ID}"
-    DATA_URL="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
-    WORKFLOW_DATA_URL="https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}"
+    DATA_URL="https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job?circle-token=${CIRCLE_TOKEN}"
+    WORKFLOW_DATA_URL="https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}?circle-token=${CIRCLE_TOKEN}"
 
     PROJECT_SLUG=${CIRCLE_BUILD_URL#https://circleci.com/}
     PROJECT_SLUG=${PROJECT_SLUG%/*}
@@ -218,10 +172,7 @@ SetupGiphyVars() {
 }
 
 SetupPreviousBuildVars() {
-    if ! WORKFLOW_DATA=$(CircleApiGet "$WORKFLOW_DATA_URL"); then
-      echo "Could not read workflow $CIRCLE_WORKFLOW_ID. Check that CIRCLE_TOKEN is a valid CircleCI personal API token with access to this project."
-      exit 1
-    fi
+    WORKFLOW_DATA=$(curl -sL "$WORKFLOW_DATA_URL")
     WORKFLOW_NAME=$(echo "$WORKFLOW_DATA" | jq -r '.name')
     local PREVIOUS_BUILD_URL="https://circleci.com/api/v2/insights/${PROJECT_SLUG}/workflows/${WORKFLOW_NAME}?branch=${CIRCLE_BRANCH}"
 
@@ -231,7 +182,10 @@ SetupPreviousBuildVars() {
     local PREVIOUS_BUILD_DATA
     echo "PREVIOUS_BUILD_URL $PREVIOUS_BUILD_URL"
 
-    PREVIOUS_BUILD_DATA=$(CircleApiGet "$PREVIOUS_BUILD_URL") || PREVIOUS_BUILD_DATA='{}'
+    PREVIOUS_BUILD_DATA=$(curl -sL GET "$PREVIOUS_BUILD_URL" \
+    --header 'Content-Type: application/json' \
+    --header 'Accept: application/json' \
+    --header "Circle-Token: ${CIRCLE_TOKEN}")
 
     PREVIOUS_BUILD_STATUS=$(echo "${PREVIOUS_BUILD_DATA}" | jq -r '.items[0].status')
     # yamllint enable
@@ -264,13 +218,22 @@ SetupPreviousBuildVars() {
 }
 
 ValidateWorkflow() {
+    WF_DATA=$(curl -sL "$DATA_URL")
+    WF_MESSAGE=$(echo "$WF_DATA" | jq '.message')
+	echo "DATA_URL=$DATA_URL"
+	echo "WF_DATA=$WF_DATA"
+	echo "WF_MESSAGE=$WF_MESSAGE"
+    # Exit if no Workflow.
+    if [ "$WF_MESSAGE" = "\"Workflow not found\"" ];
+    then
+      echo "No Workflow was found."
+      echo "Your circle-token parameter may be wrong or you do not have access to this Workflow."
+      exit 1
+    fi
     local WF_ITEMS
     local WF_LENGTH
     local VCS_SHORT
-    if ! WF_ITEMS=$(GetWorkflowJobs); then
-      echo "Could not list the jobs in workflow $CIRCLE_WORKFLOW_ID. Check that CIRCLE_TOKEN is a valid CircleCI personal API token with access to this project."
-      exit 1
-    fi
+    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
     # GET URL PATH DATA
     VCS_SHORT=$(echo "$CIRCLE_BUILD_URL" | cut -d"/" -f4)
@@ -305,8 +268,6 @@ RunWorkflowMonitor() {
 
     # Assume the WF is currently running
     local WF_FINISHED
-    local FAILED_POLLS=0
-    local MAX_FAILED_POLLS=20
     WF_FINISHED=false
     while [ "$WF_FINISHED" = false ]
     do
@@ -314,17 +275,7 @@ RunWorkflowMonitor() {
       local WF_LENGTH
 
       echo "Waiting for other jobs to finish..."
-      if ! WF_ITEMS=$(GetWorkflowJobs); then
-        FAILED_POLLS=$((FAILED_POLLS + 1))
-        if [ "$FAILED_POLLS" -ge "$MAX_FAILED_POLLS" ]; then
-          echo "Could not read the workflow's jobs for $FAILED_POLLS polls in a row, giving up."
-          exit 1
-        fi
-        echo "Could not read the workflow's jobs ($FAILED_POLLS/$MAX_FAILED_POLLS failed polls), trying again in 10 seconds"
-        sleep 10
-        continue
-      fi
-      FAILED_POLLS=0
+      WF_ITEMS=$(curl -sL "$DATA_URL" | jq '.items')
       WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
       # for each job in the workflow fetch the status.
@@ -407,12 +358,11 @@ GenerateSlackMsg() {
 
 GenerateJobsReport() {
 
+    local WF_DATA
     local WF_ITEMS
     local WF_LENGTH
-    if ! WF_ITEMS=$(GetWorkflowJobs); then
-      echo "Could not list the jobs in workflow $CIRCLE_WORKFLOW_ID to build the report."
-      exit 1
-    fi
+    WF_DATA=$(curl -sL "$DATA_URL")
+    WF_ITEMS=$(echo "$WF_DATA" | jq '.items')
     WF_LENGTH=$(echo "$WF_ITEMS" | jq length)
 
     ##############Globals##############
@@ -452,15 +402,14 @@ GenerateJobsReport() {
 			uname -a
 
             # If $JOB_NUMBER is null, probably a blocked/queued Job.
-            local JOB_DATA_RAW=""
             if [ "$JOB_NUMBER" = "null" ];
             then
                 echo "skipping raw Data for JOB"
                 BUILD_URL="${CIRCLE_WORKFLOW_URL}"
-            elif ! JOB_DATA_RAW=$(CircleApiGet "https://circleci.com/api/v1.1/project/$VCS/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$JOB_NUMBER"); then
-                echo "Could not read job $JOB_NUMBER, linking to the workflow instead"
-                BUILD_URL="${CIRCLE_WORKFLOW_URL}"
             else
+                # yamllint disable-line rule:line-length
+                local JOB_DATA_RAW
+                JOB_DATA_RAW=$(curl -sL "https://circleci.com/api/v1.1/project/$VCS/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$JOB_NUMBER?circle-token=${CIRCLE_TOKEN}")
                 # removing steps and circle_yml keys from object
                 JOB_DATA_RAW=$(echo "$JOB_DATA_RAW" | jq 'del(.circle_yml)' | jq 'del(.steps)')
                 # manually set job name as it is currently null
