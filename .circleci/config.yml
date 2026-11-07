@@ -15,6 +15,8 @@ workflows:
           filters: *filters
       - orb-tools/pack:
           filters: *filters
+          context:
+            - orb-publishing
       - orb-tools/review:
           filters: *filters
       - shellcheck/check:
